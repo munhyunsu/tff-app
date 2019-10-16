@@ -1,0 +1,6 @@
+pip
+setuptools
+
+tensorflow_federated
+matplotlib
+
