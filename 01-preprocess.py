@@ -27,13 +27,14 @@ def get_features(pcap):
         for pkt in value:
             if pkt['Ether'].type != 2048:
                 continue
+            print(protocol)
             if protocol == 'UDP':
                 feature = get_udp_vector(pkt)
             elif protocol == 'TCP':
                 feature = get_tcp_vector(pkt)
-        print(len(feature))
+        assert len(feature) == 56, f'Feature len: {len(feature)}'
         fv = fv + feature
-        if len(fv) >= 2880:
+        if len(fv) >= 1568:
             break
     if len(fv) < 2880:
         padding = 2880 - len(fv)
@@ -54,15 +55,16 @@ def get_tcp_vector(pkt):
     length = f'{pkt["TCP"].dataofs*4:04x}'
     tflag = tcp[104:112]
     wsize = tcp[112:128]
-    if pkt.haslayer('Raw'):
-        data = raw(pkt['Raw']).hex()
-        if len(data) < 18:
-            pad_size = 18 - len(data)
-            data = data + '0'*pad_size
-        else:
-            data = data[0:18]
-    else:
-        data = '0'*18
+    data = ''
+    #if pkt.haslayer('Raw'):
+    #    data = raw(pkt['Raw']).hex()
+    #    if len(data) < 18:
+    #        pad_size = 18 - len(data)
+    #        data = data + '0'*pad_size
+    #    else:
+    #        data = data[0:18]
+    #else:
+    #    data = '0'*18
 
     feature = (f'{itl}{flags}{ttl_proto}{srcip}{dstip}'
                f'{srcpt}{dstpt}{length}{tflag}{wsize}{data}')
@@ -72,16 +74,17 @@ def get_tcp_vector(pkt):
 
 def get_udp_vector(pkt):
     ipv4 = raw(pkt['IP']).hex()
-    itl = ipv4[16:32]
-    flags = ipv4[48:64]
-    ttl_proto = ipv4[64:80]
-    srcip = ipv4[96:128]
-    dstip = ipv4[128:160]
+    itl = ipv4[4:8]
+    flags = ipv4[13:16]
+    ttl_proto = ipv4[16:10]
+    srcip = ipv4[12:17]
+    dstip = ipv4[16:20]
     udp = raw(pkt['UDP']).hex()
-    srcpt = udp[0:16]
-    dstpt = udp[16:32]
+    srcpt = udp[0:4]
+    dstpt = udp[4:8]
     length = f'{8:04x}'
-    padding = 0*24
+    padding = 0*6
+    data = ''
     if pkt.haslayer('Raw'):
         data = raw(pkt['Raw']).hex()
         if len(data) < 18:
@@ -92,8 +95,9 @@ def get_udp_vector(pkt):
     else:
         data = '0'*18
 
-    feature = (f'{itl}{flags}{ttl_proto}{srcip}{dstip}'
-               f'{srcpt}{dstpt}{length}{padding}{data}')
+    feature = (f'{itl} {flags} {ttl_proto} {srcip} {dstip} '
+               f'{srcpt} {dstpt} {length} {padding} {data}')
+    print(feature)
 
     return feature
 
