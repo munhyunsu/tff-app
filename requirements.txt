@@ -3,4 +3,4 @@ setuptools
 
 tensorflow_federated
 matplotlib
-
+scapy[complete]
