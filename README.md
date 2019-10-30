@@ -2,5 +2,9 @@
 - Federated learning based app
 
 ## requirements
-- Tensorflow
-- Tensorflow-federated
+```bash
+pip3 install tensorflow_federated
+pip3 install matplotlib
+pip3 install scapy[complete]
+```
+
