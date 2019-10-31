@@ -43,6 +43,7 @@ def get_features(pcap):
 
 
 def get_tcp_vector(pkt):
+    # TODO(LuHa): BUG!!!! Bit to Byte!!
     ipv4 = raw(pkt['IP']).hex()
     itl = ipv4[16:32]
     flags = ipv4[48:64]
@@ -56,15 +57,15 @@ def get_tcp_vector(pkt):
     tflag = tcp[104:112]
     wsize = tcp[112:128]
     data = ''
-    #if pkt.haslayer('Raw'):
-    #    data = raw(pkt['Raw']).hex()
-    #    if len(data) < 18:
-    #        pad_size = 18 - len(data)
-    #        data = data + '0'*pad_size
-    #    else:
-    #        data = data[0:18]
-    #else:
-    #    data = '0'*18
+    if pkt.haslayer('Raw'):
+        data = raw(pkt['Raw']).hex()
+        if len(data) < 18:
+            pad_size = 18 - len(data)
+            data = data + '0'*pad_size
+        else:
+            data = data[0:18]
+    else:
+        data = '0'*18
 
     feature = (f'{itl}{flags}{ttl_proto}{srcip}{dstip}'
                f'{srcpt}{dstpt}{length}{tflag}{wsize}{data}')
@@ -73,6 +74,7 @@ def get_tcp_vector(pkt):
 
 
 def get_udp_vector(pkt):
+    # TODO(LuHa): BUG!!!! Bit to Byte!!
     ipv4 = raw(pkt['IP']).hex()
     itl = ipv4[4:8]
     flags = ipv4[13:16]
