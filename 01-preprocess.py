@@ -105,6 +105,7 @@ def get_udp_vector(pkt):
 
 
 def main():
+    # for debug
     print(f'Parsed args: {FLAGS}')
     print(f'Unparsed args: {_}')
 
@@ -125,6 +126,7 @@ if __name__ == '__main__':
 
     FLAGS, _ = parser.parse_known_args()
 
+    # make abspath to all path
     FLAGS.input = os.path.abspath(os.path.expanduser(FLAGS.input))
     FLAGS.output = os.path.abspath(os.path.expanduser(FLAGS.output))
 
