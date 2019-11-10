@@ -1,5 +1,4 @@
 # https://www.tensorflow.org/federated/tutorials/federated_learning_for_image_classification
-
 from __future__ import absolute_import, division, print_function
 
 import sys
@@ -53,7 +52,7 @@ print(example_element['pixels'].numpy())
 from matplotlib import pyplot as plt
 plt.imshow(np.reshape(example_element['pixels'].numpy(), (28, 28)), cmap='gray', aspect='equal')
 plt.grid('off')
-#_ = plt.show()
+_ = plt.show()
 #sys.exit(0)
 
 
