@@ -43,7 +43,6 @@ def get_features(pcap):
 
 
 def get_tcp_vector(pkt):
-    # TODO(LuHa): BUG!!!! Bit to Byte!!
     ipv4 = raw(pkt['IP']).hex()
     itl = ipv4[16:32]
     flags = ipv4[48:64]
@@ -74,7 +73,6 @@ def get_tcp_vector(pkt):
 
 
 def get_udp_vector(pkt):
-    # TODO(LuHa): BUG!!!! Bit to Byte!!
     ipv4 = raw(pkt['IP']).hex()
     itl = ipv4[4:8]
     flags = ipv4[13:16]
