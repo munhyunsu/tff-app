@@ -8,6 +8,12 @@
   pip3 install scapy[complete]
   ```
 
+## Usage
+  1. Preprocessing pcap files for creating feature vectors
+
+  ```bash
+  ```
+
 ## Coded by
 - LuHa (munhyunsu@gmail.com)
 
