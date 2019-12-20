@@ -12,6 +12,7 @@
   1. Preprocessing pcap files for creating feature vectors
 
   ```bash
+  python3 01-preprocess.py -i INPUTDIR -o OUTPUTDIR
   ```
 
 ## Coded by
