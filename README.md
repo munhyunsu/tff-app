@@ -1,6 +1,8 @@
 # tff-app
 - Federated learning based app
 
+## Federated Server
+
 ## requirements
   ```bash
   pip3 install tensorflow_federated
@@ -14,6 +16,8 @@
   ```bash
   python3 01-preprocess.py -i INPUTDIR -o OUTPUTDIR
   ```
+
+## Edge Client
 
 ## Coded by
 - LuHa (munhyunsu@gmail.com)
