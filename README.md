@@ -3,14 +3,14 @@
 
 ## Federated Server
 
-## requirements
+### Requirements
   ```bash
   pip3 install tensorflow_federated
   pip3 install matplotlib
   pip3 install scapy[complete]
   ```
 
-## Usage
+### Usage
   1. Preprocessing pcap files for creating feature vectors
 
   ```bash
@@ -18,6 +18,14 @@
   ```
 
 ## Edge Client
+
+### Requirements
+  ```bash
+  ```
+
+### Usage
+  1. Capture network traffics
+
 
 ## Coded by
 - LuHa (munhyunsu@gmail.com)
