@@ -6,5 +6,6 @@ nest_asyncio
 
 jupyter
 ipykernel
-matplotlib
+#matplotlib
+ipympl
 scapy[complete]
