@@ -2,5 +2,9 @@ pip
 setuptools
 
 tensorflow_federated
+nest_asyncio
+
+jupyter
+ipykernel
 matplotlib
 scapy[complete]
