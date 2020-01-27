@@ -5,10 +5,11 @@
 
 ### Requirements
   ```bash
-  pip3 install tensorflow_federated
-  pip3 install matplotlib
-  pip3 install scapy[complete]
+  pip3 install --upgrade -r requirements.txt
   ```
+
+  - Install scrcpy
+
 
 ### Usage
   1. Preprocessing pcap files for creating feature vectors
