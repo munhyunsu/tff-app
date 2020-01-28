@@ -22,10 +22,11 @@
 
 ### Requirements
   ```bash
+  pip3 install -r requirements.txt
   ```
 
 ### Usage
-  1. Capture network traffics
+  1. ...
 
 
 ## Coded by
