@@ -5,7 +5,13 @@ tensorflow_federated
 nest_asyncio
 
 jupyter
+jupyterlab
+## https://github.com/matplotlib/jupyter-matplotlib
+# jupyter labextension install @jupyter-widgets/jupyterlab-manager
+# jupyter labextension install jupyter-matplotlib
 ipykernel
-#matplotlib
+matplotlib
 ipympl
 scapy[complete]
+
+Pillow
