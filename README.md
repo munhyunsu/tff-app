@@ -18,6 +18,11 @@
   python3 01-preprocess.py -i INPUTDIR -o OUTPUTDIR
   ```
 
+  2. Make dataset for federated learning
+  ```bash
+  python3
+  ```
+
 ## Edge Client
 
 ### Requirements
