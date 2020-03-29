@@ -19,8 +19,11 @@
   ```
 
   2. Make dataset for federated learning
+    
+    - 
+
   ```bash
-  python3
+  python3 02-...
   ```
 
 ## Edge Client
@@ -33,6 +36,11 @@
 ### Usage
   1. ...
 
+
+### References
+[Federated Optimization: Distributed Optimization Beyond the Datacenter](https://research.google/pubs/pub44310/)
+[Communication-Efficient Learning of Deep Networks from Decentralized Data
+](https://research.google/pubs/pub44822/)
 
 ## Coded by
 - LuHa (munhyunsu@gmail.com)
