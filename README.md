@@ -1,6 +1,11 @@
 # tff-app
 - Federated learning based app
 
+## Packet Classification Baseline
+  ```bash
+  02-TCBaselineCNN.ipynb
+  ```
+
 ## Federated Server
 
 ### Requirements
@@ -25,6 +30,8 @@
   ```bash
   python3 02-...
   ```
+
+
 
 ## Edge Client
 
