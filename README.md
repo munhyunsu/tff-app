@@ -1,9 +1,6 @@
 # tff-app
 - Federated learning based app
 
-## TODO
-- Change federated learning code by some method was removed
-
 ## Packet to image (pkt2vec)
   ```bash
   python3 00-Preprocessing.py
