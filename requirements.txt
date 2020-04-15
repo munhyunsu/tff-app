@@ -13,6 +13,9 @@ ipykernel
 numpy
 pandas
 matplotlib
+pydot
+pydotplus
+graphviz
 ipympl
 scapy[complete]
 
