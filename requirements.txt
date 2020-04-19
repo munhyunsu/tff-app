@@ -1,6 +1,7 @@
 pip
 setuptools
 
+tensorflow
 tensorflow_federated
 nest_asyncio
 
