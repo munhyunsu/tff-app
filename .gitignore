@@ -6,7 +6,9 @@ splited_data/
 .tar.gz
 *.png
 
+pickles/
 *.pickle
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
