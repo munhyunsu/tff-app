@@ -28,7 +28,7 @@ def main():
     for label, path in read_pcap(root_path):
         pcap = rdpcap(path)
         label_dict = session_length.get(label, dict())
-        slen = len(pcap.sessions())
+        slen = len(pcap)
         label_dict[slen] = label_dict.get(slen, 0) + 1
         session_length[label] = label_dict
         cnt = cnt + 1
