@@ -1,6 +1,10 @@
 # tff-app
 - Federated learning based app
 
+## Requirements
+
+  - [PcapPlusPlus](https://pcapplusplus.github.io/)
+
 ## Packet to image (pkt2vec)
   ```bash
   python3 00-Preprocessing.py
