@@ -18,22 +18,20 @@ def do_reset():
         shutil.rmtree(FLAGS.output)
     if FLAGS.reset and os.path.exists(FLAGS.temp):
         shutil.rmtree(FLAGS.temp)
-
-    for label, path in read_pcap(FLAGS.input):
-        dst = os.path.abspath(
+        for label, path in read_pcap(FLAGS.input):
+            dst = os.path.abspath(
                     os.path.expanduser(os.path.join(FLAGS.temp, label)))
-        split_pcap(path, dst)
+            split_pcap(path, dst)
 
 
-def pkt2vec(pkt, img_size):
+def pkt2vec(pkt):
     ip = pkt['IP']
     hexst = raw(ip).hex()
     arr = np.array([int(hexst[i:i+2], 16) for i in range(0, len(hexst), 2)])
-    arr = arr[0:img_size*img_size]
-    arr = np.pad(arr, (0, img_size*img_size-len(arr)), 'constant', constant_values=0)
-    fv = np.reshape(arr, (-1, img_size))
+    arr = arr[0:4*375]
+    arr = np.pad(arr, (0, 4*375-len(arr)), 'constant', constant_values=0)
+    fv = np.reshape(arr, (-1, 4))
     fv = np.uint8(fv)
-    fv = np.stack((fv, fv, fv), axis=2)
     return fv
 
 
@@ -52,7 +50,7 @@ def pkt2img(base, label, cnt):
             return
         fv = pkt2vec(pkt)
         num = cnt.get(label, 0)
-        dst = os.path.join(base, f'{num:{FMT}}.png')
+        dst = os.path.join(base, f'{num:08d}.png')
         cnt[label] = num + 1
         img = Image.fromarray(fv)
         img.save(dst)
@@ -62,6 +60,7 @@ def pkt2img(base, label, cnt):
 
 
 def stop_filter(current):
+    global FLAGS
     def process_pkt(pkt):
         global current
         if not pkt.haslayer('IP'):
@@ -73,10 +72,10 @@ def stop_filter(current):
             l4 = 'TCP'
         elif ip.haslayer('UDP'):
             l4 = 'UDP'
-        if len(raw(ip[l4].payload)) < PAYLOAD_MIN:
+        if len(raw(ip[l4].payload)) < FLAGS.payload:
             return False
-        current[0] += 1
-        if current[0] > COUNT:
+        current[0] = current[0] + 1
+        if current[0] > FLAGS.limit:
             return True
         return False
     return process_pkt
@@ -112,7 +111,6 @@ def main():
 
     cnt = dict()
     current = list()
-
     for label, path in read_pcap(splited_path):
         base = os.path.abspath(os.path.expanduser(os.path.join(IMG_DATA, label)))
         os.makedirs(base, exist_ok=True)
@@ -142,10 +140,12 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=str,
                         default='./img_data',
                         help='Output directory')
-
-    parser.add_argument('--img_size', type=int,
-                        default=39,
-                        help='Packet to vector image size')
+    parser.add_argument('--payload', type=int,
+                        default=0,
+                        help='Payload size of IP packets')
+    parser.add_argument('--limit', type=int,
+                        default=int(float('inf')),
+                        help='Limit count per target pcap')
     
     FLAGS.input = os.path.abspath(os.path.expanduser(FLAGS.input))
     FLAGS.temp = os.path.abspath(os.path.expanduser(FLAGS.temp))
