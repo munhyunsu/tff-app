@@ -36,6 +36,7 @@ def pkt2vec(pkt):
 
 
 def pkt2img(base, label, cnt):
+    global FLAGS
     def process_pkt(pkt):
         if not pkt.haslayer('IP'):
             return
@@ -46,7 +47,7 @@ def pkt2img(base, label, cnt):
             l4 = 'TCP'
         elif ip.haslayer('UDP'):
             l4 = 'UDP'
-        if len(raw(ip[l4].payload)) < PAYLOAD_MIN:
+        if len(raw(ip[l4].payload)) < FLAGS.payload:
             return
         fv = pkt2vec(pkt)
         num = cnt.get(label, 0)
@@ -54,15 +55,12 @@ def pkt2img(base, label, cnt):
         cnt[label] = num + 1
         img = Image.fromarray(fv)
         img.save(dst)
-        if num % 1000 == 1:
-            print(f'{label}: {num} Processed')
     return process_pkt
 
 
 def stop_filter(current):
     global FLAGS
     def process_pkt(pkt):
-        global current
         if not pkt.haslayer('IP'):
             return False
         ip = pkt['IP']
@@ -89,7 +87,7 @@ def read_pcap(root_dir, ext=('.pcap', '.pcapng')):
             for entry in it:
                 if not entry.name.startswith('.') and entry.is_file():
                     if entry.name.endswith(ext):
-                        label = os.path.basename(os.path.dirname(entry.path)) # dirname is label
+                        label = os.path.basename(os.path.dirname(entry.path))
                         yield label, entry.path
                 elif not entry.name.startswith('.') and entry.is_dir():
                     queue.append(entry.path)
@@ -110,22 +108,21 @@ def main():
     do_reset()
 
     cnt = dict()
-    current = list()
-    for label, path in read_pcap(splited_path):
-        base = os.path.abspath(os.path.expanduser(os.path.join(IMG_DATA, label)))
+    current = [0]
+    for label, path in read_pcap(FLAGS.input):
+        base = os.path.abspath(os.path.expanduser(os.path.join(FLAGS.output, label)))
         os.makedirs(base, exist_ok=True)
         current[0] = 0
         sniff(offline=path, prn=pkt2img(base, label, cnt), store=False, stop_filter=stop_filter(current))
-        print()
+        print(f'{label}: {current[0]} Processed')
     print(cnt)
 
-    
 
 if __name__ == '__main__':
     root_path = os.path.abspath(__file__)
     root_dir = os.path.dirname(root_path)
     os.chdir(root_dir)
-    
+
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str, required=True,
@@ -134,21 +131,23 @@ if __name__ == '__main__':
     parser.add_argument('--temp', type=str,
                         default='./splited_data',
                         help='Temporarory directory')
-    parser.add_argument('--reset', type=bool, 
+    parser.add_argument('--reset', type=bool,
                         default=False,
                         help='Clear temporary files')
     parser.add_argument('--output', type=str,
                         default='./img_data',
                         help='Output directory')
     parser.add_argument('--payload', type=int,
-                        default=0,
+                        default=1,
                         help='Payload size of IP packets')
     parser.add_argument('--limit', type=int,
-                        default=int(float('inf')),
+                        default=float('inf'),
                         help='Limit count per target pcap')
-    
+
+    FLAGS, _ = parser.parse_known_args()
+
     FLAGS.input = os.path.abspath(os.path.expanduser(FLAGS.input))
     FLAGS.temp = os.path.abspath(os.path.expanduser(FLAGS.temp))
     FLAGS.output = os.path.abspath(os.path.expanduser(FLAGS.output))
-    
+
     main()
