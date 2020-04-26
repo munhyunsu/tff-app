@@ -110,10 +110,12 @@ def main():
     cnt = dict()
     current = [0]
     for label, path in read_pcap(FLAGS.input):
-        base = os.path.abspath(os.path.expanduser(os.path.join(FLAGS.output, label)))
+        base = os.path.abspath(
+                 os.path.expanduser(os.path.join(FLAGS.output, label)))
         os.makedirs(base, exist_ok=True)
         current[0] = 0
-        sniff(offline=path, prn=pkt2img(base, label, cnt), store=False, stop_filter=stop_filter(current))
+        sniff(offline=path, prn=pkt2img(base, label, cnt), 
+              store=False, stop_filter=stop_filter(current))
         print(f'{label}: {current[0]} Processed')
     print(cnt)
 
