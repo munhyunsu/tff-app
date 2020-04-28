@@ -23,7 +23,8 @@ def get_files(root_dir, ext=('.jpg', '.png')):
             for entry in it:
                 if not entry.name.startswith('.') and entry.is_file():
                     if entry.name.endswith(ext):
-                        label = os.path.basename(os.path.dirname(entry.path)) # dirname is label
+                        label = os.path.basename(
+                                  os.path.dirname(entry.path))
                         files.append(entry.path)
                 elif not entry.name.startswith('.') and entry.is_dir():
                     queue.append(entry.path)
