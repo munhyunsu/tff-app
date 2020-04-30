@@ -38,13 +38,23 @@ def main():
 
     do_reset()
 
+    i = 1
     for label, files in get_files(FLAGS.input):
         random.shuffle(files)
-        nfile = len(files) if FLAGS.count == 0 else FLAGS.count
-        dst = os.path.join(FLAGS.output, label)
+        nfile = len(files)
+        nval = int(nfile*FLAGS.valrate)
+        dst = os.path.join(FLAGS.output, '0', label)
         os.makedirs(dst, exist_ok=True)
-        for path in files[:nfile]:
+        for path in files[:nval]:
             shutil.copy(path, dst)
+        files = files[nval:]
+        ntrain = (nfile - nval)
+        dst = os.path.join(FLAGS.output, str(i), label)
+        os.makedirs(dst, exist_ok=True)
+        for path in files[:ntrain]:
+            shutil.copy(path, dst)
+        i = i + 1
+        print(f'Done {label}')
 
 
 if __name__ == '__main__':
@@ -58,11 +68,11 @@ if __name__ == '__main__':
                         help=('Target directory which has pcap files '
                               'in subdirectory'))
     parser.add_argument('--output', type=str,
-                        default='./selected_data',
+                        default='./federated_data',
                         help='Output directory')
-    parser.add_argument('--count', type=int,
-                        default=0,
-                        help='File count per class')
+    parser.add_argument('--valrate', type=float,
+                        default=0.1,
+                        help='Rate of validation set')
 
     FLAGS, _ = parser.parse_known_args()
 
