@@ -2,9 +2,14 @@ import os
 import pickle
 
 import tensorflow as tf
+import tensorflow_federated as tff
 
-def save_ckpt(state, metrics, path='./ckpt'):
-    keras_model = create_keras_model()
+
+def save_ckpt(state: tff.learning.framework.ServerState, 
+              metrics: list, 
+              model_fn: Callable,
+              path: str):
+    keras_model = model_fn()
     keras_model.compile(loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                         metrics=[tf.keras.metrics.CategoricalAccuracy()])
     tff.learning.assign_weights_to_keras_model(keras_model, state.model)
