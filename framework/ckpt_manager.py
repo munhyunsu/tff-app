@@ -12,18 +12,21 @@ def save_ckpt_fl(state: tff.learning.framework.ServerState,
                  metrics: list, 
                  path: str):
     keras_model = model_fn()
-    keras_model.compile(loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
-                        metrics=[tf.keras.metrics.CategoricalAccuracy()])
+    keras_model.compile(loss=model_loss,
+                        metrics=model_metrics)
     tff.learning.assign_weights_to_keras_model(keras_model, state.model)
     save_ckpt(keras_model, metrics, path)
 
 
-def load_ckpt_fl(state, path='./ckpt'):
+def load_ckpt_fl(state: tff.learning.framework.ServerState,
+                 path: str):
     keras_model, metrics = load_ckpt(path)
     state = tff.learning.state_with_new_model_weights(
               state,
-              trainable_weights=[v.numpy() for v in keras_model.trainable_weights],
-              non_trainable_weights=[v.numpy() for v in keras_model.non_trainable_weights])
+              trainable_weights=[v.numpy() 
+                for v in keras_model.trainable_weights],
+              non_trainable_weights=[v.numpy() 
+                for v in keras_model.non_trainable_weights])
 
     return state, metrics
 
