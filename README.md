@@ -1,6 +1,12 @@
 # tff-app
 - Federated learning based app
 
+## TODO
+
+  - Protobuf generator
+
+  - Dynamic classification model
+
 ## Requirements
 
   - [PcapPlusPlus](https://pcapplusplus.github.io/)
@@ -9,11 +15,7 @@
   ```bash
   python3 00-Preprocessing.py
   ```
-  or
-  ```bash
-  00-Preprocessing.ipynb
-  ```
-  - Image with 39 x 39 x 1 from ip layer  
+  - Image with 375 x 4 x 1 from ip layer
 
 
 ## Packet Classification Baseline
@@ -37,7 +39,7 @@
   Non-trainable params: 0
   ```
   
-    
+
 
 
 ## Federated Server
