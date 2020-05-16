@@ -5,7 +5,13 @@
 
   - Protobuf generator
 
+    ```bash
+    python3 01-create_protobuf.py
+    ```
+
   - Dynamic classification model
+  
+    - Model ckpt saver / restorer
 
 ## Requirements
 
