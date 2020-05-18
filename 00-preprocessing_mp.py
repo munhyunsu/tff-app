@@ -122,8 +122,6 @@ def main():
 
     do_reset()
 
-    cnt = dict()
-    current = [0]
     with multiprocessing.Pool(FLAGS.process) as p:
         joined_result = p.imap_unordered(process_pcap, read_pcap(FLAGS.temp))
         for result in joined_result:
