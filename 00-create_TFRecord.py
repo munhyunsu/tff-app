@@ -29,7 +29,7 @@ def do_reset():
             split_pcap(path, dst)
 
 
-def pkt2tfrecord(tf_examples, label, idx):
+def pkt2tfrecord(writer, label, idx):
     global FLAGS
     label_ = [label.encode('utf-8')]
     idx_ = [idx]
@@ -54,7 +54,7 @@ def pkt2tfrecord(tf_examples, label, idx):
             'idx': tf.train.Feature(int64_list=tf.train.Int64List(value=idx_)),
         }))
 
-        tf_examples.append((tf_example, label, idx))
+        writer.write(tf_example.SerializeToString())
     
     return as_tfrecord
 
@@ -125,32 +125,35 @@ def split_pcap(src, dst):
 
 
 def process_pcap(args):
+    global tfwriter
+    writer = tfwriter
     path = args[0]
     labels = args[1]
     idx = args[2]
     label = labels[idx]
 
-    tf_examples = list()
     current = [0]
-    sniff(offline=path, prn=pkt2tfrecord(tf_examples, label, idx), 
-          store=False, stop_filter=stop_filter(current))
-    return tf_examples
+    sniff(offline=path, prn=pkt2tfrecord(writer, label, idx), 
+            store=False, stop_filter=stop_filter(current))
+    return label, current[0]
 
+tfwriter = None
 
 def main():
     # Print Parameters
     print(f'Parsed: {FLAGS}')
     print(f'Unparsed: {_}')
+    global tfwriter
 
     do_reset()
 
     tf_record_path = os.path.join(FLAGS.output, f'dataset_{FLAGS.payload}.tfrecord')
     with tf.io.TFRecordWriter(tf_record_path) as writer:
+        tfwriter = writer
         with multiprocessing.Pool(FLAGS.process) as p:
             results = p.imap_unordered(process_pcap, read_pcap(FLAGS.temp))
             for result in results:
-                for tf_example, label, idx in result:
-                    writer.write(tf_example.SerializeToString())
+                continue
 
 
 if __name__ == '__main__':
