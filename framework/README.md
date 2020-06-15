@@ -9,7 +9,19 @@ python3 -m venv --copies ./venv
 
   - This does not require setuid / setgid
 
-```bash
-setcap cap_net_raw,cap_net_admin=ep ./python3
-getcap ./python3
-```
+  ```bash
+  setcap cap_net_raw,cap_net_admin=ep ./python3
+  getcap ./python3
+  ```
+
+3. Copy tcpdump from /usr/sbin to ./venv/bin
+
+  ```bash
+  cp /usr/sbin/tcpdump ./
+  ```
+
+  ```bash
+  setcap cap_net_raw,cap_net_admin=ep ./tcpdump
+  getcap ./tcpdump
+  ```
+
