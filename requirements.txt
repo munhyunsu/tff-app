@@ -1,15 +1,9 @@
 pip
-setuptools
 
 tensorflow_federated
 #tensorflow # tensorflow_federated requires
 nest_asyncio
 
-jupyter
-jupyterlab
-## https://github.com/matplotlib/jupyter-matplotlib
-# jupyter labextension install @jupyter-widgets/jupyterlab-manager
-# jupyter labextension install jupyter-matplotlib
 ipykernel
 #numpy # tensorflow_federated requires
 pandas
