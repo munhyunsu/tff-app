@@ -1,2 +1,3 @@
 pip
 scapy[basic]
+websockets

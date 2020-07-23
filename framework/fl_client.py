@@ -31,7 +31,7 @@ def main():
     print(f'Unparsed: {_}')
 
     try:
-        sniff(prn=pkt_handler(), store=False, 
+        sniff(prn=pkt_handler(), store=False,
               filter='ip')
     except KeyboardInterrupt:
         print(f'Keyboard Interrupted. Shutting down program.')
@@ -55,4 +55,3 @@ if __name__ == '__main__':
     FLAGS.config = os.path.abspath(os.path.expanduser(FLAGS.output))
 
     main()
-
