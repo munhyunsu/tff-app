@@ -1,5 +1,12 @@
-# tff-app
-- Federated learning based app
+# Federated-based traffic classification application
+
+## [TBD] Part#1 Simulation
+
+### Experiment list
+
+1. Centralized vs. Federated
+1. The number of clients
+1. Data type: Balanced / NonIID
 
 ## TODO
 
