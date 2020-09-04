@@ -1,17 +1,13 @@
 pip
 
+ipykernel
+ipympl
+
 tensorflow_federated
 #tensorflow # tensorflow_federated requires
 nest_asyncio
-
-ipykernel
 #numpy # tensorflow_federated requires
 pandas
 matplotlib
-pydot
-pydotplus
-graphviz
-ipympl
-scapy[complete]
-
-Pillow
+Pillow # Image processing
+scapy[complete] # pcap processing
