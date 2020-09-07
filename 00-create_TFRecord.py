@@ -182,7 +182,7 @@ if __name__ == '__main__':
                         default=float('inf'),
                         help='Limit count per target pcap')
     parser.add_argument('--process', type=int,
-                        default=multiprocessing.cpu_count(),
+                        default=multiprocessing.cpu_count()//2,
                         help='The number of process pool')
 
     FLAGS, _ = parser.parse_known_args()
