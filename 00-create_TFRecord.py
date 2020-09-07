@@ -13,6 +13,7 @@ import tensorflow as tf
 
 FLAGS = None
 _ = None
+WRITERS = dict()
 
 
 def do_reset():
@@ -20,16 +21,19 @@ def do_reset():
     if os.path.exists(FLAGS.output):
         shutil.rmtree(FLAGS.output)
     os.makedirs(FLAGS.output, exist_ok=True)
+    
     if FLAGS.reset and os.path.exists(FLAGS.temp):
         shutil.rmtree(FLAGS.temp)
+        
     if FLAGS.reset:
-        for path, labels, idx in read_pcap(FLAGS.input):
+        for path, label in read_pcap(FLAGS.input):
             dst = os.path.abspath(
-                    os.path.expanduser(os.path.join(FLAGS.temp, labels[idx])))
+                    os.path.expanduser(os.path.join(FLAGS.temp, label)))
             split_pcap(path, dst)
 
 
-def pkt2tfrecord(writer, label, idx):
+
+def pkt2tfrecord(writers, label, idx):
     global FLAGS
     label_ = [label.encode('utf-8')]
     idx_ = [idx]
@@ -54,7 +58,7 @@ def pkt2tfrecord(writer, label, idx):
             'idx': tf.train.Feature(int64_list=tf.train.Int64List(value=idx_)),
         }))
 
-        writer.write(tf_example.SerializeToString())
+        writers[label].write(tf_example.SerializeToString())
     
     return as_tfrecord
 
@@ -92,7 +96,6 @@ def stop_filter(current):
 
 
 def read_pcap(root_dir, ext=('.pcap', '.pcapng')):
-    labels = get_labels(root_dir)
     queue = [root_dir]
     while len(queue) != 0:
         nest_dir = queue.pop()
@@ -101,7 +104,7 @@ def read_pcap(root_dir, ext=('.pcap', '.pcapng')):
                 if not entry.name.startswith('.') and entry.is_file():
                     if entry.name.endswith(ext):
                         label = os.path.basename(os.path.dirname(entry.path))
-                        yield entry.path, labels, labels.index(label)
+                        yield entry.path, label
                 elif not entry.name.startswith('.') and entry.is_dir():
                     queue.append(entry.path)
 
@@ -137,23 +140,34 @@ def process_pcap(args):
             store=False, stop_filter=stop_filter(current))
     return label, current[0]
 
-tfwriter = None
+
+def set_writers(labels):
+    global FLAGS
+    writers = dict()
+    for label in labels:
+        wpath = os.path.join(FLAGS.output, f'{label}.tfrecord')
+        writer = tf.io.TFRecordWriter(wpath)
+        writers[label] = writer
+    return writers
+
 
 def main():
-    # Print Parameters
     print(f'Parsed: {FLAGS}')
     print(f'Unparsed: {_}')
-    global tfwriter
 
     do_reset()
+    labels = get_labels(FLAGS.input)
+    writers = set_writers(labels)
 
-    tf_record_path = os.path.join(FLAGS.output, f'dataset_{FLAGS.payload}.tfrecord')
-    with tf.io.TFRecordWriter(tf_record_path) as writer:
-        tfwriter = writer
-        with multiprocessing.Pool(FLAGS.process) as p:
-            results = p.imap_unordered(process_pcap, read_pcap(FLAGS.temp))
-            for result in results:
-                continue
+    current = [0] # for a stop_filter
+    for path, label in read_pcap(FLAGS.temp):
+        print(f'Processing {path} {label}')
+        idx = labels.index(label)
+        sniff(offline=path, prn=pkt2tfrecord(writers, label, idx),
+              store=False, stop_filter=stop_filter(current))
+
+    for writer in writers.values():
+        writer.close()
 
 
 if __name__ == '__main__':
@@ -181,9 +195,6 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=int,
                         default=float('inf'),
                         help='Limit count per target pcap')
-    parser.add_argument('--process', type=int,
-                        default=multiprocessing.cpu_count()//2,
-                        help='The number of process pool')
 
     FLAGS, _ = parser.parse_known_args()
 
