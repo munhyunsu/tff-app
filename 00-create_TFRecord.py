@@ -13,7 +13,6 @@ import tensorflow as tf
 
 FLAGS = None
 _ = None
-WRITERS = dict()
 
 
 def do_reset():
@@ -30,7 +29,6 @@ def do_reset():
             dst = os.path.abspath(
                     os.path.expanduser(os.path.join(FLAGS.temp, label)))
             split_pcap(path, dst)
-
 
 
 def pkt2tfrecord(writers, label, idx):
@@ -125,20 +123,6 @@ def split_pcap(src, dst):
     cmd = f'PcapSplitter -f {src} -o {dst} -m connection'
     cmd = shlex.split(cmd)
     subprocess.run(cmd)
-
-
-def process_pcap(args):
-    global tfwriter
-    writer = tfwriter
-    path = args[0]
-    labels = args[1]
-    idx = args[2]
-    label = labels[idx]
-
-    current = [0]
-    sniff(offline=path, prn=pkt2tfrecord(writer, label, idx), 
-            store=False, stop_filter=stop_filter(current))
-    return label, current[0]
 
 
 def set_writers(labels):
