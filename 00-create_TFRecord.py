@@ -161,6 +161,7 @@ if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument
     parser.add_argument('--input', type=str, required=True,
                         help=('Target directory which has pcap files '
                               'in subdirectory'))
