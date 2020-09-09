@@ -1,6 +1,7 @@
 # Load library
 import os
 import csv
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -92,17 +93,18 @@ def get_dataframe(dataset, sample_size):
         ## check pass or not
         if cnt.get(lab, 0) >= sample_size[lab]:
             continue
-        df.append({'x': vector,
-                   'y': idx}, ignore_index=True)
+        df = df.append({'x': vector,
+                        'y': idx}, ignore_index=True)
         cnt[lab] = cnt.get(lab, 0) + 1
         if cnt[lab] >= sample_size[lab]:
             done.add(lab)
+            if DEBUG:
+                print(f'Done {lab} {cnt[lab]}')
             if len(done) == len(sample_size):
-                if DEBUG:
-                    print(f'Done {lab} {cnt[lab]}')
                 break
         if DEBUG:
             print(f'{lab} {cnt[lab]}', end='\r')
+    return df
 
 
 def main():
@@ -112,18 +114,47 @@ def main():
     dataset = get_data(FLAGS.input)
     if DEBUG:
         print(f'Dataset: {dataset}')
-    idx2lab, lab2cnt = get_index(dataset)
+
+    if os.path.exists('/tmp/get_index.pickle'):
+        with open('/tmp/get_index.pickle', 'rb') as f:
+            idx2lab, lab2cnt = pickle.load(f)
+    else:
+        idx2lab, lab2cnt = get_index(dataset)
+        with open('/tmp/get_index.pickle', 'wb') as f:
+            pickle.dump((idx2lab, lab2cnt), f)
     if DEBUG:
         print(f'lab2cnt: {lab2cnt}')
-    weights = get_weight(FLAGS.weight, idx2lab)
+
+    if os.path.exists('/tmp/get_weight.pickle'):
+        with open('/tmp/get_weight.pickle', 'rb') as f:
+            weights = pickle.load(f)
+    else:
+        weights = get_weight(FLAGS.weight, idx2lab)
+        with open('/tmp/get_weight.pickle', 'wb') as f:
+            pickle.dump(weights, f)
     if DEBUG:
         print(f'weights: {weights}')
-    datatick = get_datatick(lab2cnt, weights)
+        
+    if os.path.exists('/tmp/get_datatick.pickle'):
+        with open('/tmp/get_datatick.pickle', 'rb') as f:
+            datatick = pickle.load(f)
+    else:
+        datatick = get_datatick(lab2cnt, weights)
+        with open('/tmp/get_datatick.pickle', 'wb') as f:
+            pickle.dump(datatick, f)
     if DEBUG:
         print(f'datatick: {datatick}')
-    sample_size = get_sample_size(weights, datatick)
+        
+    if os.path.exists('/tmp/get_sample_size.pickle'):
+        with open('/tmp/get_sample_size.pickle', 'rb') as f:
+            sample_size = pickle.load(f)
+    else:
+        sample_size = get_sample_size(weights, datatick)
+        with open('/tmp/get_sample_size.pickle', 'wb') as f:
+            pickle.dump(sample_size, f) 
     if DEBUG:
         print(f'sample_size: {sample_size}')
+
     dataframe = get_dataframe(dataset, sample_size)
     dataframe.to_pickle(FLAGS.output)
     if DEBUG:
@@ -145,7 +176,7 @@ if __name__ == '__main__':
                         help='The application weights')
     parser.add_argument('--output', type=str, required=True,
                         help='The path of DataFrame pickle')
-    parser.add_argument('--buffersize', type=int, default=1024*100,
+    parser.add_argument('--buffersize', type=int, default=1024*1024*1024,
                         help='The size of buffer used in shuffle')
 
     FLAGS, _ = parser.parse_known_args()
