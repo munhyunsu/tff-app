@@ -1,13 +1,9 @@
 # Load library
 import os
-import subprocess
-import shlex
-import shutil
+import csv
 
-from scapy.all import *
-from PIL import Image
 import numpy as np
-
+import pandas as pd
 import tensorflow as tf
 
 FLAGS = None
@@ -102,6 +98,8 @@ def get_dataframe(dataset, sample_size):
         if cnt[lab] >= sample_size[lab]:
             done.add(lab)
             if len(done) == len(sample_size):
+                if DEBUG:
+                    print(f'Done {lab} {cnt[lab]}')
                 break
         if DEBUG:
             print(f'{lab} {cnt[lab]}', end='\r')
