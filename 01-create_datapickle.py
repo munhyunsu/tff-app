@@ -86,7 +86,7 @@ def get_dataframe(dataset, sample_size):
     for raw_record in dataset.shuffle(FLAGS.buffersize):
         ## parse data
         data = tf.train.Example.FromString(raw_record.numpy())
-        vector = data.features.feature['vector'].int64_list.value
+        vector = list(data.features.feature['vector'].int64_list.value)
         idx = data.features.feature['idx'].int64_list.value[0]
         lab = data.features.feature['label'].bytes_list.value[0].decode('utf-8')
 
@@ -155,6 +155,8 @@ def main():
     if DEBUG:
         print(f'sample_size: {sample_size}')
 
+    if FLAGS.buffersize == -1:
+        FLAGS.buffersize = sum(lab2cnt.values())
     dataframe = get_dataframe(dataset, sample_size)
     dataframe.to_pickle(FLAGS.output)
     if DEBUG:
