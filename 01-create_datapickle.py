@@ -86,7 +86,7 @@ def get_dataframe(dataset, sample_size):
     for raw_record in dataset.shuffle(FLAGS.buffersize):
         ## parse data
         data = tf.train.Example.FromString(raw_record.numpy())
-        vector = np.array(data.features.feature['vector'].int64_list.value).reshape((-1, 4))
+        vector = list(data.features.feature['vector'].int64_list.value)
         idx = data.features.feature['idx'].int64_list.value[0]
         lab = data.features.feature['label'].bytes_list.value[0].decode('utf-8')
 
