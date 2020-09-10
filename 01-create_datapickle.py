@@ -86,15 +86,16 @@ def get_dataframe(dataset, sample_size):
     for raw_record in dataset.shuffle(FLAGS.buffersize):
         ## parse data
         data = tf.train.Example.FromString(raw_record.numpy())
-        vector = list(data.features.feature['vector'].int64_list.value)
+        vector = np.array(data.features.feature['vector'].int64_list.value).reshape((-1, 4))
         idx = data.features.feature['idx'].int64_list.value[0]
         lab = data.features.feature['label'].bytes_list.value[0].decode('utf-8')
 
         ## check pass or not
         if cnt.get(lab, 0) >= sample_size[lab]:
             continue
-        df = df.append({'x': vector,
-                        'y': idx}, ignore_index=True)
+        df = df.append({'vector': vector,
+                        'idx': idx,
+                        'lab': lab}, ignore_index=True)
         cnt[lab] = cnt.get(lab, 0) + 1
         if cnt[lab] >= sample_size[lab]:
             done.add(lab)
@@ -178,7 +179,7 @@ if __name__ == '__main__':
                         help='The application weights')
     parser.add_argument('--output', type=str, required=True,
                         help='The path of DataFrame pickle')
-    parser.add_argument('--buffersize', type=int, default=1024*1024*1024,
+    parser.add_argument('--buffersize', type=int, default=1024*1024,
                         help='The size of buffer used in shuffle')
 
     FLAGS, _ = parser.parse_known_args()
