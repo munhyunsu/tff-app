@@ -3,6 +3,7 @@ import csv
 
 import tensorflow as tf
 
+
 def get_data(path_root):
     tfrecords = list()
     for entry in os.scandir(path_root):
