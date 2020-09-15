@@ -3,7 +3,8 @@
 data/
 dataset*/
 splited_data/
-.tar.gz
+*.tar.gz
+*.tat.bz2
 *.png
 
 pickles/
