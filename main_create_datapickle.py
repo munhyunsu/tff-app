@@ -54,42 +54,46 @@ def main():
     if DEBUG:
         print(f'Dataset: {dataset}')
 
-    if os.path.exists('/tmp/get_index.pickle'):
-        with open('/tmp/get_index.pickle', 'rb') as f:
+    tpath = os.path.join(FLAGS.output, 'get_index.pickle')
+    if os.path.exists(tpath):
+        with open(tpath, 'rb') as f:
             idx2lab, lab2cnt = pickle.load(f)
     else:
         idx2lab, lab2cnt = get_index(dataset)
-        with open('/tmp/get_index.pickle', 'wb') as f:
+        with open(tpath, 'wb') as f:
             pickle.dump((idx2lab, lab2cnt), f)
     if DEBUG:
         print(f'lab2cnt: {lab2cnt}')
 
-    if os.path.exists('/tmp/get_weight.pickle'):
-        with open('/tmp/get_weight.pickle', 'rb') as f:
+    tpath = os.path.join(FLAGS.output, 'get_weight.pickle')
+    if os.path.exists(tpath):
+        with open(tpath, 'rb') as f:
             weights = pickle.load(f)
     else:
         weights = get_weight(FLAGS.weight, idx2lab)
-        with open('/tmp/get_weight.pickle', 'wb') as f:
+        with open(tpath, 'wb') as f:
             pickle.dump(weights, f)
     if DEBUG:
         print(f'weights: {weights}')
-        
-    if os.path.exists('/tmp/get_datatick.pickle'):
-        with open('/tmp/get_datatick.pickle', 'rb') as f:
+    
+    tpath = os.path.join(FLAGS.output, 'get_datatick.pickle')
+    if os.path.exists(tpath):
+        with open(tpath, 'rb') as f:
             datatick = pickle.load(f)
     else:
         datatick = get_datatick(lab2cnt, weights)
-        with open('/tmp/get_datatick.pickle', 'wb') as f:
+        with open(tpath, 'wb') as f:
             pickle.dump(datatick, f)
     if DEBUG:
         print(f'datatick: {datatick}')
-        
-    if os.path.exists('/tmp/get_sample_size.pickle'):
-        with open('/tmp/get_sample_size.pickle', 'rb') as f:
+
+    tpath = os.path.join(FLAGS.output, 'get_sample_size.pickle')
+    if os.path.exists(tpath):
+        with open(tpath, 'rb') as f:
             sample_size = pickle.load(f)
     else:
         sample_size = get_sample_size(weights, datatick)
-        with open('/tmp/get_sample_size.pickle', 'wb') as f:
+        with open(tpath, 'wb') as f:
             pickle.dump(sample_size, f) 
     if DEBUG:
         print(f'sample_size: {sample_size}')
