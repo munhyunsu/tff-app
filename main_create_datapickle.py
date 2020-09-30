@@ -117,7 +117,7 @@ if __name__ == '__main__':
                         help='The present debug message')
     parser.add_argument('--input', type=str, required=True,
                         help='The path of tfrecords')
-    parser.add_argument('--weight', type=str,
+    parser.add_argument('--weight', type=str, 
                         help='The application weights')
     parser.add_argument('--output', type=str, required=True,
                         help='The path of DataFrame pickle')

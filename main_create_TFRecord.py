@@ -171,8 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('--reset', type=bool,
                         default=False,
                         help='Clear temporary files')
-    parser.add_argument('--output', type=str,
-                        default='./tfrecord',
+    parser.add_argument('--output', type=str, required=True,
                         help='Output directory')
     parser.add_argument('--payload', type=int,
                         default=1,
