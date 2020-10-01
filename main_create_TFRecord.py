@@ -168,8 +168,7 @@ if __name__ == '__main__':
     parser.add_argument('--temp', type=str,
                         default='./splited_data',
                         help='Temporarory directory')
-    parser.add_argument('--reset', type=bool,
-                        default=False,
+    parser.add_argument('--reset', action='store_true',
                         help='Clear temporary files')
     parser.add_argument('--output', type=str, required=True,
                         help='Output directory')
