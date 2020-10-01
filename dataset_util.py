@@ -7,7 +7,9 @@ import tensorflow as tf
 def get_data(path_root):
     tfrecords = list()
     for entry in os.scandir(path_root):
-        if not entry.name.startswith('.') and entry.is_file():
+        if entry.name.startswith('.') and not entry.is_file():
+            continue
+        if entry.name.endswith('tfrecord'):
             tfrecords.append(entry.path)
     return tf.data.TFRecordDataset(tfrecords)
 
