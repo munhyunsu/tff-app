@@ -2,31 +2,31 @@
 import os
 import csv
 import pickle
+import psutil
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from dataset_util import get_data, get_index, get_weight, get_datatick, get_sample_size
+from dataset_util import get_data, get_index, get_weight, get_datatick, get_sample_size, get_filesize
 
 FLAGS = None
 DEBUG = None
 _ = None
 
 
-def get_dataframe(dataset, sample_size):
-    global FLAGS
+def get_dataframe(dataset, sample_size, buffersize):
     global DEBUG
-    df = pd.DataFrame(columns=['x', 'y'])
+    df = pd.DataFrame()
     cnt = dict()
     done = set()
     
-    for raw_record in dataset.shuffle(FLAGS.buffersize):
+    for raw_record in dataset.shuffle(buffersize):
         ## parse data
         data = tf.train.Example.FromString(raw_record.numpy())
         vector = list(data.features.feature['vector'].int64_list.value)
-        idx = data.features.feature['idx'].int64_list.value[0]
-        lab = data.features.feature['label'].bytes_list.value[0].decode('utf-8')
+        idx = list(data.features.feature['idx'].int64_list.value[0])
+        lab = list(data.features.feature['label'].bytes_list.value[0].decode('utf-8'))
 
         ## check pass or not
         if cnt.get(lab, 0) >= sample_size[lab]:
@@ -46,11 +46,22 @@ def get_dataframe(dataset, sample_size):
     return df
 
 
+def get_buffersize(ipath, lab2cnt, buffersize):
+    global DEBUG
+    if buffersize != -1:
+        return buffersize
+    dsize = sum(lab2cnt.values())
+    fsize = get_filesize(ipath, ext='tfrecord') * 2.5
+    usize = fsize / dsize
+    msize = psutil.virtual_memory().available
+    return min(int(msize/usize), dsize)
+    
+
 def main():
     print(f'Parsed: {FLAGS}')
     print(f'Unparsed: {_}')
     
-    dataset = get_data(FLAGS.input)
+    dataset = get_data(FLAGS.input, ext='tfrecord')
     if DEBUG:
         print(f'Dataset: {dataset}')
 
@@ -76,7 +87,7 @@ def main():
             pickle.dump(weights, f)
     if DEBUG:
         print(f'weights: {weights}')
-    
+
     tpath = os.path.join(FLAGS.output, 'get_datatick.pickle')
     if os.path.exists(tpath):
         with open(tpath, 'rb') as f:
@@ -99,10 +110,12 @@ def main():
     if DEBUG:
         print(f'sample_size: {sample_size}')
 
-    if FLAGS.buffersize == -1:
-        FLAGS.buffersize = sum(lab2cnt.values())
+    buffersize = get_buffersize(FLAGS.input, lab2cnt, FLAGS.buffersize)
+    if DEBUG:
+        print(f'buffersize: {buffersize}')
+
     tpath = os.path.join(FLAGS.output, 'sampled_dataset.pickle')
-    dataframe = get_dataframe(dataset, sample_size)
+    dataframe = get_dataframe(dataset, sample_size, buffersize)
     dataframe.to_pickle(tpath)
     if DEBUG:
         print(f'Done pickling to {tpath}')
