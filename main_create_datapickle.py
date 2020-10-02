@@ -24,25 +24,26 @@ def get_dataframe(dataset, sample_size, buffersize):
     for raw_record in dataset.shuffle(buffersize):
         ## parse data
         data = tf.train.Example.FromString(raw_record.numpy())
-        vector = list(data.features.feature['vector'].int64_list.value)
-        idx = list(data.features.feature['idx'].int64_list.value[0])
-        lab = list(data.features.feature['label'].bytes_list.value[0].decode('utf-8'))
-
+        vector = [list(data.features.feature['vector'].int64_list.value)]
+        idx = [data.features.feature['idx'].int64_list.value[0]]
+        lab = [data.features.feature['label'].bytes_list.value[0].decode('utf-8')]
+        
         ## check pass or not
-        if cnt.get(lab, 0) >= sample_size[lab]:
+        ptr = lab[0]
+        if cnt.get(ptr, 0) >= sample_size[ptr]:
             continue
         df = df.append({'vector': vector,
                         'idx': idx,
                         'lab': lab}, ignore_index=True)
-        cnt[lab] = cnt.get(lab, 0) + 1
-        if cnt[lab] >= sample_size[lab]:
-            done.add(lab)
+        cnt[ptr] = cnt.get(ptr, 0) + 1
+        if cnt[ptr] >= sample_size[ptr]:
+            done.add(ptr)
             if DEBUG:
-                print(f'Done {lab} {cnt[lab]}')
+                print(f'Done {ptr} {cnt[ptr]}')
             if len(done) == len(sample_size):
                 break
         if DEBUG:
-            print(f'{lab} {cnt[lab]}', end='\r')
+            print(f'{ptr} {cnt[ptr]}', end='\r')
     return df
 
 
