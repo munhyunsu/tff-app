@@ -70,7 +70,8 @@ def main():
         with open(tpath, 'rb') as f:
             weights = pickle.load(f)
     else:
-        weights = get_weight(FLAGS.weight, idx2lab)
+        wpath = os.path.join(FLAGS.input, 'weights.csv')
+        weights = get_weight(wpath, idx2lab)
         with open(tpath, 'wb') as f:
             pickle.dump(weights, f)
     if DEBUG:
@@ -100,10 +101,11 @@ def main():
 
     if FLAGS.buffersize == -1:
         FLAGS.buffersize = sum(lab2cnt.values())
+    tpath = os.path.join(FLAGS.output, 'sampled_dataset.pickle')
     dataframe = get_dataframe(dataset, sample_size)
-    dataframe.to_pickle(FLAGS.output)
+    dataframe.to_pickle(tpath)
     if DEBUG:
-        print(f'Done pickling to {FLAGS.output}')
+        print(f'Done pickling to {tpath}')
 
 
 if __name__ == '__main__':
@@ -117,8 +119,6 @@ if __name__ == '__main__':
                         help='The present debug message')
     parser.add_argument('--input', type=str, required=True,
                         help='The path of tfrecords')
-    parser.add_argument('--weight', type=str, 
-                        help='The application weights')
     parser.add_argument('--output', type=str, required=True,
                         help='The path of DataFrame pickle')
     parser.add_argument('--buffersize', type=int, default=1024*1024,
