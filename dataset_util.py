@@ -4,12 +4,12 @@ import csv
 import tensorflow as tf
 
 
-def get_data(path_root):
+def get_data(path_root, ext='tfrecord'):
     tfrecords = list()
     for entry in os.scandir(path_root):
         if entry.name.startswith('.') and not entry.is_file():
             continue
-        if entry.name.endswith('tfrecord'):
+        if entry.name.endswith(ext):
             tfrecords.append(entry.path)
     return tf.data.TFRecordDataset(tfrecords)
 
@@ -68,3 +68,13 @@ def get_sample_size(weights, datatick):
     for k, v in weights.items():
         sample_size[k] = datatick*v
     return sample_size
+
+
+def get_filesize(path_root, ext=''):
+    fsize = 0
+    for entry in os.scandir(path_root):
+        if entry.name.startswith('.') and not entry.is_file():
+            continue
+        if entry.name.endswith(ext):
+            fsize = fsize + os.stat(entry.path).st_size
+    return fsize
