@@ -58,7 +58,7 @@ def pkt2tfrecord(writers, label, idx):
 
         writers[label].write(tf_example.SerializeToString())
     
-    return as_tfrecord
+    return as_tfrecord 
 
 
 def pkt2vec(pkt):
