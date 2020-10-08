@@ -4,7 +4,7 @@ import csv
 import tensorflow as tf
 
 
-def get_data(path_root, ext='tfrecord'):
+def get_tfrecord(path_root, ext='tfrecord'):
     tfrecords = list()
     for entry in os.scandir(path_root):
         if entry.name.startswith('.') and not entry.is_file():

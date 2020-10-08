@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from dataset_util import get_data, get_index, get_weight, get_datatick, get_sample_size, get_filesize
+from dataset_util import get_tfrecord, get_index, get_weight, get_datatick, get_sample_size, get_filesize
 
 FLAGS = None
 DEBUG = None
@@ -62,7 +62,7 @@ def main():
     print(f'Parsed: {FLAGS}')
     print(f'Unparsed: {_}')
     
-    dataset = get_data(FLAGS.input, ext='tfrecord')
+    dataset = get_tfrecord(FLAGS.input, ext='tfrecord')
     if DEBUG:
         print(f'Dataset: {dataset}')
 
