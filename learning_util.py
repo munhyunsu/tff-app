@@ -111,3 +111,17 @@ def load_ckpt(path, state):
         metrics = pickle.load(f)
 
     return state, metrics
+
+
+def early_stop(loss, min_delta=0.001, patience=3):
+    if len(loss) < patience:
+        return False
+    ptr = loss[-patience]
+    delta = 0
+    for value in loss[-patience:]:
+        delta = delta + max(0, ptr-value)
+        ptr = value
+    delta = delta / (patience-1)
+    if delta < min_delta:
+        return True
+    return False

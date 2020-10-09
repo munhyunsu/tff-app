@@ -27,8 +27,8 @@ def main():
     dataset['x'] = dataset['vector'].apply(learning_util.preprocess(img_shape))
     dataset['y'] = dataset['idx']
     
-    dataset = dataset.sample(frac=1).reset_index(drop=True)
-    
+    dataset = dataset.sample(frac=1, random_state=FLAGS.random_state).reset_index(drop=True)
+
     if DEBUG:
         print(dataset)
     
@@ -74,8 +74,8 @@ def main():
         'val_accuracy': list(),
     }
     path_output = os.path.join(FLAGS.output, f'c{FLAGS.nclients}_e{FLAGS.num_epochs}_r{FLAGS.max_rounds}')
-    if FLAGS.ckpt_load:
-        state, metrics = learning_util.load_ckpt(path_output, state)
+    if FLAGS.ckpt_load is not None:
+        state, metrics = learning_util.load_ckpt(FLAGS.ckpt_load, state)
         if DEBUG:
             print(f'Load completed: rounds {metrics["rounds"]}')
 
@@ -94,8 +94,10 @@ def main():
                    f'val_output: {val_output}'))
         if rounds%FLAGS.ckpt_term == 0:
             learning_util.save_ckpt(path_output, state, metrics, learning_util.create_model, len(idx2lab), img_shape)
+        if FLAGS.early_stop and learning_util.early_stop(metrics['val_loss'], min_delta=0.0001, patience=5):
+            break
     learning_util.save_ckpt(path_output, state, metrics, learning_util.create_model, len(idx2lab), img_shape)
-    
+
 
 if __name__ == '__main__':
     root_path = os.path.abspath(__file__)
@@ -126,10 +128,14 @@ if __name__ == '__main__':
                         help='The number of epochs')
     parser.add_argument('--max_rounds', type=int, default=10,
                         help='The number of rounds')
+    parser.add_argument('--random_state', type=int,
+                        help='The random state for dataframe sample')
+    parser.add_argument('--early_stop', action='store_true',
+                        help='The on / off early stop')
     parser.add_argument('--output', type=str, default=os.path.splitext(__file__)[0],
                         help='The output directory')
-    parser.add_argument('--ckpt_load', action='store_true',
-                        help='The on / off checkpoint load')
+    parser.add_argument('--ckpt_load', type=str,
+                        help='The path of checkpoint load')
     parser.add_argument('--ckpt_term', type=int, default=10,
                         help='The checkpoint save term')
 
@@ -137,6 +143,7 @@ if __name__ == '__main__':
 
     FLAGS.input = os.path.abspath(os.path.expanduser(FLAGS.input))
     FLAGS.output = os.path.abspath(os.path.expanduser(FLAGS.output))
+    FLAGS.ckpt_load = os.path.abspath(os.path.expanduser(FLAGS.ckpt_load))
 
     DEBUG = FLAGS.debug
 
