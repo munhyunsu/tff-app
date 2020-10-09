@@ -143,7 +143,8 @@ if __name__ == '__main__':
 
     FLAGS.input = os.path.abspath(os.path.expanduser(FLAGS.input))
     FLAGS.output = os.path.abspath(os.path.expanduser(FLAGS.output))
-    FLAGS.ckpt_load = os.path.abspath(os.path.expanduser(FLAGS.ckpt_load))
+    if FLAGS.ckpt_load is not None:
+        FLAGS.ckpt_load = os.path.abspath(os.path.expanduser(FLAGS.ckpt_load))
 
     DEBUG = FLAGS.debug
 
