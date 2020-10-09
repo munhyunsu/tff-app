@@ -1,15 +1,12 @@
 import os
-import csv
-import pickle
 import time
 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 import tensorflow as tf
-import matplotlib.pyplot as plt
+import tensorflow_federated as tff
 
-from learning_util import load_dataset
+import learning_util
 
 FLAGS = _ = None
 STIME = time.time()
@@ -20,14 +17,14 @@ def main():
         print(f'Parsed arguments {FLAGS}')
         print(f'Unparsed arguments {_}')
     
-    dataset, idx2lab, lab2cnt = load_dataset(FLAGS.input)
+    dataset, idx2lab, lab2cnt = learning_util.load_dataset(FLAGS.input)
     if DEBUG:
         print(dataset)
 
         
     img_shape = (FLAGS.img_height, FLAGS.img_width, 1) # gray scale
     
-    dataset['x'] = dataset['vector'].apply(preprocess(img_shape))
+    dataset['x'] = dataset['vector'].apply(learning_util.preprocess(img_shape))
     dataset['y'] = dataset['idx']
     
     dataset = dataset.sample(frac=1).reset_index(drop=True)
@@ -36,7 +33,7 @@ def main():
         print(dataset)
     
     
-    raw_train_datasets, raw_test_dataset = create_fl_dataset(
+    raw_train_datasets, raw_test_dataset = learning_util.create_fl_dataset(
         dataset, idx2lab, FLAGS.nclients, FLAGS.val_size, printable=DEBUG)
 
     def client_fn(client_id):
@@ -52,7 +49,7 @@ def main():
     sample_batch = tf.nest.map_structure(lambda x: x.numpy(), next(iter(test_dataset)))
 
     def model_fn():
-        keras_model = create_model(len(idx2lab), img_shape)
+        keras_model = learning_util.create_model(len(idx2lab), img_shape)
         return tff.learning.from_keras_model(
             keras_model,
             input_spec=test_dataset.element_spec,
@@ -78,7 +75,7 @@ def main():
     }
     path_output = os.path.join(FLAGS.output, f'c{FLAGS.nclients}_e{FLAGS.num_epochs}_r{FLAGS.max_rounds}')
     if FLAGS.ckpt_load:
-        state, metrics = load_ckpt(path_output, state)
+        state, metrics = learning_util.load_ckpt(path_output, state)
         if DEBUG:
             print(f'Load completed: rounds {metrics["rounds"]}')
 
@@ -96,8 +93,8 @@ def main():
                    f'output: {output["train"]}, '
                    f'val_output: {val_output}'))
         if rounds%FLAGS.ckpt_term == 0:
-            save_ckpt(path_output, state, metrics, create_model, len(idx2lab), img_shape)
-    save_ckpt(path_output, state, metrics, create_model, len(idx2lab), img_shape)
+            learning_util.save_ckpt(path_output, state, metrics, learning_util.create_model, len(idx2lab), img_shape)
+    learning_util.save_ckpt(path_output, state, metrics, learning_util.create_model, len(idx2lab), img_shape)
     
 
 if __name__ == '__main__':
@@ -117,7 +114,7 @@ if __name__ == '__main__':
                         help='The height of dataset image')
     parser.add_argument('--input', type=str, required=True,
                         help='The input preprocessed directory')
-    parser.add_argument('--nclients', type=int, required=True,
+    parser.add_argument('--nclients', type=int, default=10,
                         help='The number of clients')
     parser.add_argument('--val_size', type=float, default=0.1,
                         help='The fraction of validation set')
@@ -127,7 +124,7 @@ if __name__ == '__main__':
                         help='The size of shuffle buffer')
     parser.add_argument('--num_epochs', type=int, default=1,
                         help='The number of epochs')
-    parser.add_argument('--max_rounds', type=int, required=True,
+    parser.add_argument('--max_rounds', type=int, default=10,
                         help='The number of rounds')
     parser.add_argument('--output', type=str, default=os.path.splitext(__file__)[0],
                         help='The output directory')
