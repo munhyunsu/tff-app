@@ -118,6 +118,8 @@ if __name__ == '__main__':
                         help='The input preprocessed directory')
     parser.add_argument('--nclients', type=int, default=10,
                         help='The number of clients')
+    parser.add_argument('--cclients', type=int,
+                        help='The number of clients for this learning')
     parser.add_argument('--val_size', type=float, default=0.1,
                         help='The fraction of validation set')
     parser.add_argument('--batch_size', type=int, default=32,
