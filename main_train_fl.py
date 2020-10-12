@@ -147,6 +147,8 @@ if __name__ == '__main__':
     FLAGS.output = os.path.abspath(os.path.expanduser(FLAGS.output))
     if FLAGS.ckpt_load is not None:
         FLAGS.ckpt_load = os.path.abspath(os.path.expanduser(FLAGS.ckpt_load))
+    if FLAGS.cclients is None:
+        FLAGS.cclients = FLAGS.nclients
 
     DEBUG = FLAGS.debug
 
