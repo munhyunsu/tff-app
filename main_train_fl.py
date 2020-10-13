@@ -81,7 +81,8 @@ def main():
 
 
     for rounds in range(metrics['rounds']+1, FLAGS.max_rounds+1):
-        state, output = iterative_process.next(state, client_data)
+        state, output = iterative_process.next(state, 
+                                               client_data[:FLAGS.cclients])
         val_output = evaluation(state.model, [test_dataset])
         metrics['rounds'] = rounds
         metrics['loss'].append(output['train']['loss'])
