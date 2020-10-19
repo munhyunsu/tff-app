@@ -9,6 +9,7 @@ import tensorflow_federated as tff
 import learning_util
 
 FLAGS = _ = None
+DEBUG = False
 STIME = time.time()
 
 
