@@ -22,7 +22,7 @@ def main():
     if DEBUG:
         print(dataset)
 
-        
+    
     img_shape = (FLAGS.img_height, FLAGS.img_width, 1) # gray scale
     
     dataset['x'] = dataset['vector'].apply(learning_util.preprocess(img_shape))
@@ -122,6 +122,8 @@ if __name__ == '__main__':
                         help='The number of clients')
     parser.add_argument('--cclients', type=int,
                         help='The number of clients for this learning')
+    parser.add_argument('--dbalance', type=str,
+                        help='The path of data balance')
     parser.add_argument('--val_size', type=float, default=0.1,
                         help='The fraction of validation set')
     parser.add_argument('--batch_size', type=int, default=32,
