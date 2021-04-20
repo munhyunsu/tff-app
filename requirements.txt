@@ -1,5 +1,5 @@
 pip
-
+wheel
 ipykernel
 ipympl
 

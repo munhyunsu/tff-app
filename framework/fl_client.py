@@ -7,13 +7,16 @@ FLAGS = None
 _ = None
 GLOBAL = dict()
 
+
 class PacketSniffer(object):
     def __init__(iface=None):
         pass
 
+
 def gopath():
     global FLAGS
     return os.path.abspath(os.path.expanduser(FLAGS.output))
+
 
 def pkt_handler():
     global FLAGS
