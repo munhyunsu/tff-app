@@ -1,5 +1,12 @@
 # Federated-based traffic classification application
 
+## Federated learning component
+
+### Server
+
+### Client
+
+
 ## [TBD] Part#1 Simulation
 
 ### Experiment list
@@ -7,11 +14,6 @@
 1. Centralized vs. Federated
 1. The number of clients
 1. Data type: Balanced / NonIID
-
-
-## 
-
-
 
 ## TODO
 
