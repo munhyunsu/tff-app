@@ -1,6 +1,9 @@
 pip
 wheel
 
+tensorflow
+#numpy # dependency of tensorflow
+pandas
 grpcio
 grpcio-tools
 
