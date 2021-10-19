@@ -19,8 +19,13 @@ def serve():
     server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
     federated_pb2_grpc.add_ManagerServicer_to_server(Server(), server)
     server.add_insecure_port('[::]:50051')
+    print(f'Run server')
     server.start()
-    server.wait_for_termination()
+    print(f'Start server')
+    try:
+        server.wait_for_termination()
+    except KeyboardInterrupt:
+        server.wait_for_termination(5)
 
 
 if __name__ == '__main__':
