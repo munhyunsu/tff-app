@@ -25,7 +25,9 @@ def serve():
     try:
         server.wait_for_termination()
     except KeyboardInterrupt:
+        print('End server')
         server.wait_for_termination(5)
+    print(f'Terminate server')
 
 
 if __name__ == '__main__':
