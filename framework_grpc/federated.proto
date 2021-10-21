@@ -1,14 +1,18 @@
 syntax = "proto3";
 
 service Manager {
-    rpc SayHello (HelloRequest) returns (HelloReply) {}
-    rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
+    rpc GetModel (ModelRequest) returns (ModelReply)
 }
 
-message HelloRequest {
-    string name = 1;
+message ModelRequest {
+    enum Information {
+        VERSION = 0;
+        PARAMETER = 1;
+        ARCHITECTURE = 2;
+    }
+    Information information = 1;
 }
 
-message HelloReply {
-    string message = 1;
+message ModelReply {
+    bytes result = 1;
 }
