@@ -7,12 +7,9 @@ import federated_pb2_grpc
 
 
 class Server(federated_pb2_grpc.Manager):
-
-    def SayHello(self, request, context):
-        return federated_pb2.HelloReply(message=f'Hello, {request.name}')
-
-    def SayHelloAgain(self, request, context):
-        return federated_pb2.HelloReply(message=f'Hello again, {request.name}')
+    def GetModel(self, request, context):
+        value = '1.3.2'
+        return federated_pb2.ModelReply(version=value)
 
 
 def serve():
@@ -26,7 +23,7 @@ def serve():
         server.wait_for_termination()
     except KeyboardInterrupt:
         print('End server')
-        server.wait_for_termination(5)
+        server.wait_for_termination(1)
     print(f'Terminate server')
 
 
