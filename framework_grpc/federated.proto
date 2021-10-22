@@ -14,9 +14,14 @@ message ModelRequest {
 }
 
 message ModelReply {
+    message Parameter {
+        string shape = 1;
+        bytes value = 2;
+    }
+
     oneof model {
         string version = 1;
-        bytes parameter = 2;
+        Parameter parameter = 2;
         bytes architecture = 3;
     }
 }
