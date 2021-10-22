@@ -2,6 +2,7 @@ pip
 wheel
 
 tensorflow
+tensorflow-hub
 #numpy # dependency of tensorflow
 pandas
 grpcio
