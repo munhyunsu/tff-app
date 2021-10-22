@@ -8,6 +8,14 @@ import federated_pb2_grpc
 
 class Server(federated_pb2_grpc.Manager):
     def GetModel(self, request, context):
+        print(f'Information: {request.information}')
+        if request.information == federated_pb2.ModelRequest.Information.VERSION:
+            
+            print('VERSION')
+        elif request.information == federated_pb2.ModelRequest.Information.PARAMETER:
+            print('PARAMETER')
+        elif request.information == federated_pb2.ModelRequest.Information.ARCHITECTURE:
+            print('ARCHITECTURE')
         value = '1.3.2'
         return federated_pb2.ModelReply(version=value)
 
