@@ -4,6 +4,7 @@ import time
 import concurrent
 import io
 import pickle
+import json
 
 import grpc
 import numpy as np
@@ -16,6 +17,10 @@ DEBUG = False
 STIME = time.time()
 
 class Server(federated_pb2_grpc.Manager):
+    def __init__(self):
+        if DEBUG:
+            print(f'Load models by {FLAGS.model}')
+
     def GetModel(self, request, context):
         reply = federated_pb2.ModelReply()
         print(f'Information: {request.information}')
@@ -56,8 +61,11 @@ if __name__ == '__main__':
                         help='The bind address')
     parser.add_argument('--port', type=int, default=50000,
                         help='The bind port number')
+    parser.add_argument('--model', type=str, required=True,
+                        help='The model configuration file')
 
     FLAGS, _ = parser.parse_known_args()
+    FLAGS.model = os.path.abspath(os.path.expanduser(FLAGS.model))
     DEBUG = FLAGS.debug
 
     main()
