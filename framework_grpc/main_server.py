@@ -52,7 +52,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', action='store_true',
                         help='The present debug message')
-    parser.add_argument('--address', type=str, default=''
+    parser.add_argument('--address', type=str, default='[::]',
                         help='The bind address')
     parser.add_argument('--port', type=int, default=50000,
                         help='The bind port number')
