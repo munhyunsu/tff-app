@@ -2,12 +2,7 @@ import os
 import sys
 import argparse
 import time
-import io
-import pickle
-import json
-import importlib
 
-import numpy as np
 import mariadb
 
 import secret
@@ -96,88 +91,6 @@ def main():
     if DEBUG:
         print(f'[{int(time.time()-STIME)}] CREATE TABLES: {res}')
 
-    if FLAGS.input is not None:
-        if DEBUG:
-            print(f'[{int(time.time()-STIME)}] Read model from {FLAGS.input}')
-        spec = importlib.util.spec_from_file_location('FLModel', FLAGS.input)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        model = module.FLModel()
-        
-        name = model.get_name()
-        cur.execute('''SELECT id, name FROM models
-                         WHERE models.name = ?;''', (name,))
-        res = cur.fetchall()
-        if DEBUG:
-            print(f'[{int(time.time()-STIME)}] SELECT with {name}: {res}')
-
-        if len(res) == 0:
-            if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Insert model to database: {name}')
-            architecture = model.get_architecture()
-            cur.execute('''INSERT IGNORE INTO architectures (architecture)
-                             VALUES (?)
-                             RETURNING (id);''', (architecture,))
-            res = cur.fetchall()
-            if len(res) == 0:
-                cur.execute('''SELECT id FROM architectures
-                                 WHERE architecture = ?;''', (architecture,))
-                res = cur.fetchall()
-            architecture_id = res[0][0]
-            if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Inserted architecture to database: {architecture_id}')
-
-            label = model.get_label()
-            cur.execute('''INSERT IGNORE INTO labels (label)
-                             VALUES(?)
-                             RETURNING (id);''', (label,))
-            res = cur.fetchall()
-            if len(res) == 0:
-                cur.execute('''SELECT id FROM labels
-                                 WHERE label = ?;''', (label,))
-                res = cur.fetchall()
-            label_id = res[0][0]
-            if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Inserted label to database: {label_id}')
-
-            parameter = model.get_parameter()
-            cur.execute('''INSERT IGNORE INTO parameters (parameter)
-                             VALUES (?)
-                             RETURNING (id);''', (parameter,))
-            res = cur.fetchall()
-            if len(res) == 0:
-                cur.execute('''SELECT id FROM parameters
-                                 WHERE parameter = ?;''', (parameter,))
-                res = cur.fetchall()
-            parameter_id = res[0][0]
-            if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Inserted parameter to database: {parameter_id}')
-
-            cur.execute('''INSERT IGNORE INTO models (
-                             name, architecture, parameter, label,
-                             major, minor, micro)
-                             VALUES (
-                             ?, ?, ?, ?,
-                             0, 0, 0)
-                             RETURNING (id);''', (name, architecture_id, parameter_id, label_id))
-            res = cur.fetchall()
-            if len(res) == 0:
-                cur.execute('''SELECT id FROM models
-                                 WHERE name = ?
-                                   AND architecture = ?
-                                   AND parameter = ?
-                                   AND label = ?;''', (name, architecture_id, parameter_id, label_id))
-                res = cur.fetchall()
-            model_id = res[0][0]
-            if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Inserted model to database: {model_id}')
-        else:
-            if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Ignore model with {res} in database already')
-
-    if DEBUG:
-        print(f'[{int(time.time()-STIME)}] Done!')
-
     conn.commit()
     conn.close()
 
@@ -192,12 +105,8 @@ if __name__ == '__main__':
                         help='The present debug message')
     parser.add_argument('--reset', action='store_true',
                         help='Clear exists tables before creation')
-    parser.add_argument('--input', type=str,
-                        help='The model class file to insert')
 
     FLAGS, _ = parser.parse_known_args()
-    if FLAGS.input is not None:
-        FLAGS.input = os.path.abspath(os.path.expanduser(FLAGS.input))
     DEBUG = FLAGS.debug
 
     main()
