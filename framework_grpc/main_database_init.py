@@ -36,10 +36,19 @@ def main():
         cur.execute('''DROP TABLE IF EXISTS parameters;''')
         cur.execute('''DROP TABLE IF EXISTS labels;''')
         cur.execute('''DROP TABLE IF EXISTS architectures;''')
+        cur.execute('''DROP TABLE IF EXISTS users;''')
         conn.commit()
         if DEBUG:
             print(f'[{int(time.time()-STIME)}] DROP all tables of {secret.dbname}')
 
+    cur.execute('''CREATE TABLE IF NOT EXISTS users (
+                     id INT AUTO_INCREMENT,
+                     user TEXT NOT NULL,
+                     salt TEXT NOT NULL,
+                     password TEXT NOT NULL,
+                     PRIMARY KEY (id),
+                     UNIQUE (user)
+                   );''')
     cur.execute('''CREATE TABLE IF NOT EXISTS architectures (
                      id INT AUTO_INCREMENT,
                      architecture TEXT NOT NULL,
@@ -96,41 +105,53 @@ def main():
         model = module.FLModel()
         
         name = model.get_name()
-        cur.execute('''SELECT id FROM models
+        cur.execute('''SELECT id, name FROM models
                          WHERE models.name = ?;''', (name,))
-        res = cur.fetchone()
+        res = cur.fetchall()
         if DEBUG:
             print(f'[{int(time.time()-STIME)}] SELECT with {name}: {res}')
 
-        if res is None:
+        if len(res) == 0:
             if DEBUG:
                 print(f'[{int(time.time()-STIME)}] Insert model to database: {name}')
             architecture = model.get_architecture()
             cur.execute('''INSERT IGNORE INTO architectures (architecture)
                              VALUES (?)
                              RETURNING (id);''', (architecture,))
-            architecture_id = cur.fetchone()[0]
+            res = cur.fetchall()
+            if len(res) == 0:
+                cur.execute('''SELECT id FROM architectures
+                                 WHERE architecture = ?;''', (architecture,))
+                res = cur.fetchall()
+            architecture_id = res[0][0]
             if DEBUG:
                 print(f'[{int(time.time()-STIME)}] Inserted architecture to database: {architecture_id}')
-            #conn.commit()
 
             label = model.get_label()
             cur.execute('''INSERT IGNORE INTO labels (label)
                              VALUES(?)
                              RETURNING (id);''', (label,))
-            label_id = cur.fetchone()[0]
+            res = cur.fetchall()
+            if len(res) == 0:
+                cur.execute('''SELECT id FROM labels
+                                 WHERE label = ?;''', (label,))
+                res = cur.fetchall()
+            label_id = res[0][0]
             if DEBUG:
                 print(f'[{int(time.time()-STIME)}] Inserted label to database: {label_id}')
-            #conn.commit()
 
             parameter = model.get_parameter()
             cur.execute('''INSERT IGNORE INTO parameters (parameter)
                              VALUES (?)
                              RETURNING (id);''', (parameter,))
-            parameter_id = cur.fetchone()[0]
+            res = cur.fetchall()
+            if len(res) == 0:
+                cur.execute('''SELECT id FROM parameters
+                                 WHERE parameter = ?;''', (parameter,))
+                res = cur.fetchall()
+            parameter_id = res[0][0]
             if DEBUG:
                 print(f'[{int(time.time()-STIME)}] Inserted parameter to database: {parameter_id}')
-            #conn.commit()
 
             cur.execute('''INSERT IGNORE INTO models (
                              name, architecture, parameter, label,
@@ -139,16 +160,26 @@ def main():
                              ?, ?, ?, ?,
                              0, 0, 0)
                              RETURNING (id);''', (name, architecture_id, parameter_id, label_id))
-            model_id = cur.fetchone()[0]
+            res = cur.fetchall()
+            if len(res) == 0:
+                cur.execute('''SELECT id FROM models
+                                 WHERE name = ?
+                                   AND architecture = ?
+                                   AND parameter = ?
+                                   AND label = ?;''', (name, architecture_id, parameter_id, label_id))
+                res = cur.fetchall()
+            model_id = res[0][0]
             if DEBUG:
-                print(f'[{int(time.time()-STIME)}] Inserted parameter to database: {model_id}')
-            #conn.commit()
+                print(f'[{int(time.time()-STIME)}] Inserted model to database: {model_id}')
         else:
             if DEBUG:
                 print(f'[{int(time.time()-STIME)}] Ignore model with {res} in database already')
 
     if DEBUG:
         print(f'[{int(time.time()-STIME)}] Done!')
+
+    conn.commit()
+    conn.close()
 
 
 if __name__ == '__main__':
