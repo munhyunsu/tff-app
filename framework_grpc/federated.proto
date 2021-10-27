@@ -1,27 +1,32 @@
 syntax = "proto3";
 
 service Manager {
+    rpc GetInfomation (InfomationRequest) returns (InformationReply);
     rpc GetModel (ModelRequest) returns (ModelReply);
 }
 
-message ModelRequest {
-    enum Information {
-        VERSION = 0;
-        PARAMETER = 1;
-        ARCHITECTURE = 2;
+message InformationRequest {
+    string name = 1;
+}
+
+message InformationReply {
+    message Model {
+        string name = 1;
+        string version = 2;
     }
-    Information information = 1;
+    repeated Model model = 1;
+}
+
+message ModelRequest {
+    string name = 1;
+    string version = 2;
+    bool architecture = 3;
+    bool parameter = 4;
 }
 
 message ModelReply {
-    message Parameter {
-        string shape = 1;
-        bytes value = 2;
-    }
-
-    oneof model {
-        string version = 1;
-        Parameter parameter = 2;
-        bytes architecture = 3;
-    }
+    string name = 1;
+    string version = 2;
+    bytes architecture = 3;
+    bytes parameter = 4;
 }
