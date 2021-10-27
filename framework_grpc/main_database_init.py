@@ -29,8 +29,9 @@ def main():
         cur.execute('''DROP TABLE IF EXISTS knowledges;''')
         cur.execute('''DROP TABLE IF EXISTS models;''')
         cur.execute('''DROP TABLE IF EXISTS parameters;''')
-        cur.execute('''DROP TABLE IF EXISTS labels;''')
         cur.execute('''DROP TABLE IF EXISTS architectures;''')
+        cur.execute('''DROP TABLE IF EXISTS labels;''')
+        cur.execute('''DROP TABLE IF EXISTS names;''')
         cur.execute('''DROP TABLE IF EXISTS users;''')
         conn.commit()
         if DEBUG:
@@ -44,39 +45,52 @@ def main():
                      PRIMARY KEY (id),
                      UNIQUE (user)
                    );''')
-    cur.execute('''CREATE TABLE IF NOT EXISTS architectures (
+    cur.execute('''CREATE TABLE IF NOT EXISTS names (
                      id INT AUTO_INCREMENT,
-                     architecture TEXT NOT NULL,
+                     name TEXT NOT NULL,
                      PRIMARY KEY (id),
-                     UNIQUE (architecture)
+                     UNIQUE (name)
                    );''')
     cur.execute('''CREATE TABLE IF NOT EXISTS labels (
                      id INT AUTO_INCREMENT,
+                     name INT NOT NULL,
                      label LONGBLOB NOT NULL,
                      PRIMARY KEY (id),
+                     FOREIGN KEY (name) REFERENCES names (id),
                      UNIQUE (label)
+                   );''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS architectures (
+                     id INT AUTO_INCREMENT,
+                     name INT NOT NULL,
+                     architecture TEXT NOT NULL,
+                     PRIMARY KEY (id),
+                     FOREIGN KEY (name) REFERENCES names (id),
+                     UNIQUE (architecture)
                    );''')
     cur.execute('''CREATE TABLE IF NOT EXISTS parameters (
                      id INT AUTO_INCREMENT,
+                     name INT NOT NULL,
                      parameter LONGBLOB NOT NULL,
                      PRIMARY KEY (id),
+                     FOREIGN KEY (name) REFERENCES names (id),
                      UNIQUE (parameter)
                    );''')
     cur.execute('''CREATE TABLE IF NOT EXISTS models (
                      id INT AUTO_INCREMENT,
-                     name TINYTEXT NOT NULL,
+                     name INT NOT NULL,
+                     label INT NOT NULL,
                      architecture INT NOT NULL,
                      parameter INT NOT NULL,
-                     label INT NOT NULL,
                      major INT NOT NULL,
                      minor INT NOT NULL,
                      micro INT NOT NULL,
                      PRIMARY KEY (id),
-                     UNIQUE (architecture, parameter, label, major, minor, micro),
+                     UNIQUE (name, major, minor, micro),
+                     FOREIGN KEY (name) REFERENCES names (id),
+                     FOREIGN KEY (label) REFERENCES labels (id),
                      FOREIGN KEY (architecture) REFERENCES architectures (id),
                      FOREIGN KEY (parameter) REFERENCES parameters (id)
                    );''')
-    cur.execute('''CREATE INDEX IF NOT EXISTS idx_name ON models (name);''')
     cur.execute('''CREATE TABLE IF NOT EXISTS knowledges (
                      id INT AUTO_INCREMENT,
                      base INT NOT NULL,
@@ -110,4 +124,3 @@ if __name__ == '__main__':
     DEBUG = FLAGS.debug
 
     main()
-
