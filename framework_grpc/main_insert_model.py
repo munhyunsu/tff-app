@@ -33,13 +33,14 @@ def main():
     spec.loader.exec_module(module)
     model = module.FLModel()
 
-    isin = False
     name = model.get_name()
     cur.execute('''SELECT id FROM names
-                     WHERE name = ?;''', (name,))
+                     WHERE name = ?
+                     LIMIT 1;''', (name,))
     res = cur.fetchall()
     if len(res) != 0:
-        isin = True
+        print(f'[{int(time.time()-STIME)}] Already Inserted model to database: {res[0][0]}')
+    #    return
 
     cur.execute('''INSERT IGNORE INTO names (name)
                      VALUES (?)
@@ -100,8 +101,8 @@ def main():
         if DEBUG:
             print(f'[{int(time.time()-STIME)}] Inserted parameter to database: {parameter_id}')
     else:
+        parameter_id = res[0][0]
         if DEBUG:
-            parameter_id = res[0][0]
             print(f'[{int(time.time()-STIME)}] Skipped inserting parameter to database: {parameter_id}')
 
     cur.execute('''INSERT IGNORE INTO models (
@@ -110,7 +111,7 @@ def main():
                      VALUES (
                      ?, ?, ?, ?,
                      0, 0, 0)
-                     RETURNING (id);''', (name_id, label_id, architecture_id, parameter_id, 0, 0, 0))
+                     RETURNING (id);''', (name_id, label_id, architecture_id, parameter_id))
     res = cur.fetchall()
     if len(res) == 0:
         cur.execute('''SELECT id FROM models
