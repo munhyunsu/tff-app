@@ -1,8 +1,11 @@
 syntax = "proto3";
 
 service Manager {
-    rpc GetInfomation (InfomationRequest) returns (InformationReply);
+    rpc GetInformation (InformationRequest) returns (InformationReply);
     rpc GetModel (ModelRequest) returns (ModelReply);
+    rpc PushTrainResult (TrainResult) returns (Note);
+    rpc GetStatus (StatusRequest) returns (StatusReply);
+    rpc PushControl (Control) returns (Note);
 }
 
 message InformationRequest {
@@ -14,19 +17,53 @@ message InformationReply {
         string name = 1;
         string version = 2;
     }
-    repeated Model model = 1;
+    repeated Model models = 1;
 }
 
 message ModelRequest {
     string name = 1;
     string version = 2;
-    bool architecture = 3;
-    bool parameter = 4;
+    bool label = 3;
+    bool compile = 4;
+    bool architecture = 5;
+    bool parameter = 6;
 }
 
 message ModelReply {
     string name = 1;
     string version = 2;
-    bytes architecture = 3;
-    bytes parameter = 4;
+    bytes label = 3;
+    bytes compile = 4;
+    string architecture = 5;
+    bytes parameter = 6;
+}
+
+message TrainResult {
+    string name = 1;
+    string version = 2;
+    bytes parameter = 3;
+}
+
+message Note {
+    string value = 1;
+}
+
+message StatusRequest {
+    string name = 1;
+    string version =2;
+}
+
+message StatusReply {
+    string name = 1;
+    string version = 2;
+    int32 knowledge = 3;
+}
+
+message Control {
+    string name = 1;
+    string version = 2;
+    enum Job {
+        AGGREGATION = 0;
+    }
+    Job job = 3;
 }
