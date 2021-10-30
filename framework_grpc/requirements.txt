@@ -7,4 +7,6 @@ tensorflow-hub
 pandas
 grpcio
 grpcio-tools
-
+mariadb
+Pillow # Image
+scipy
