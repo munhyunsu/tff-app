@@ -31,6 +31,7 @@ def main():
         cur.execute('''DROP TABLE IF EXISTS parameters;''')
         cur.execute('''DROP TABLE IF EXISTS architectures;''')
         cur.execute('''DROP TABLE IF EXISTS labels;''')
+        cur.execute('''DROP TABLE IF EXISTS compiles;''')
         cur.execute('''DROP TABLE IF EXISTS names;''')
         cur.execute('''DROP TABLE IF EXISTS users;''')
         conn.commit()
@@ -59,6 +60,14 @@ def main():
                      FOREIGN KEY (name) REFERENCES names (id),
                      UNIQUE (label)
                    );''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS compiles (
+                     id INT AUTO_INCREMENT,
+                     name INT NOT NULL,
+                     compile LONGBLOB NOT NULL,
+                     PRIMARY KEY (id),
+                     FOREIGN KEY (name) REFERENCES names (id),
+                     UNIQUE (compile)
+                   );''')
     cur.execute('''CREATE TABLE IF NOT EXISTS architectures (
                      id INT AUTO_INCREMENT,
                      name INT NOT NULL,
@@ -79,6 +88,7 @@ def main():
                      id INT AUTO_INCREMENT,
                      name INT NOT NULL,
                      label INT NOT NULL,
+                     compile INT NOT NULL,
                      architecture INT NOT NULL,
                      parameter INT NOT NULL,
                      major INT NOT NULL,
@@ -88,6 +98,7 @@ def main():
                      UNIQUE (name, major, minor, micro),
                      FOREIGN KEY (name) REFERENCES names (id),
                      FOREIGN KEY (label) REFERENCES labels (id),
+                     FOREIGN KEY (compile) REFERENCES compiles (id),
                      FOREIGN KEY (architecture) REFERENCES architectures (id),
                      FOREIGN KEY (parameter) REFERENCES parameters (id)
                    );''')
