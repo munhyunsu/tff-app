@@ -71,13 +71,41 @@ class Server(federated_pb2_grpc.Manager):
     def GetModel(self, request, context):
         req_name = request.name
         req_version = request.version
+        req_label = request.label
+        req_compile = request.compile
         req_architecture = request.architecture
         req_parameter = request.parameter
         if DEBUG:
-            print(f'[{int(time.time()-STIME)}] GetModel with {req_name} {req_version} {req_architecture} {req_parameter}')
+            print(f'[{int(time.time()-STIME)}] GetModel with {req_name} {req_version} {req_label} {req_compile} {req_architecture} {req_parameter}')
 
         major, minor, micro = map(int, req_version[1:].split('.'))
         
+        label = b''
+        if req_label:
+            self.cur.execute('''SELECT labels.label FROM labels
+                                  INNER JOIN models ON labels.id = models.label
+                                  INNER JOIN names ON models.name = names.id
+                                  WHERE names.name = ?
+                                    AND models.major = ?
+                                    AND models.minor = ?
+                                    AND models.micro = ?;''', (req_name, major, minor, micro))
+            res = self.cur.fetchall()
+            if len(res) != 0:
+                label = res[0][0]
+
+        compile_ = b''
+        if req_compile:
+            self.cur.execute('''SELECT compiles.compile FROM compiles
+                                  INNER JOIN models ON compiles.id = models.label
+                                  INNER JOIN names ON models.name = names.id
+                                  WHERE names.name = ?
+                                    AND models.major = ?
+                                    AND models.minor = ?
+                                    AND models.micro = ?;''', (req_name, major, minor, micro))
+            res = self.cur.fetchall()
+            if len(res) != 0:
+                compile_ = res[0][0]
+
         architecture = ''
         if req_architecture:
             self.cur.execute('''SELECT architectures.architecture FROM architectures
@@ -105,7 +133,157 @@ class Server(federated_pb2_grpc.Manager):
                 parameter = res[0][0]
 
         return federated_pb2.ModelReply(name=req_name, version=req_version,
-                                        architecture=architecture, parameter=parameter)
+                                        label=label, compile=compile_, architecture=architecture, parameter=parameter)
+
+    def PushTrainResult(self, request, context):
+        req_name = request.name
+        req_version = request.version
+        req_parameter = request.parameter
+        if DEBUG:
+            print(f'[{int(time.time()-STIME)}] PushTrainResult with {req_name} {req_version} {len(req_parameter)}')
+
+        major, minor, micro = map(int, req_version[1:].split('.'))
+        self.cur.execute('''SELECT models.id FROM models
+                              INNER JOIN names ON models.name = names.id
+                              WHERE names.name = ?
+                                AND models.major = ?
+                                AND models.minor = ?
+                                AND models.micro = ?;''', (req_name, major, minor, micro))
+        res = self.cur.fetchall()
+        if len(res) != 0:
+            base_id = res[0][0]
+        else:
+            return federated_pb2.Note(value='Not found')
+
+        self.cur.execute('''INSERT IGNORE INTO knowledges (
+                              base, parameter)
+                              VALUES (
+                              ?, ?)
+                              RETURNING (id);''', (base_id, req_parameter))
+        res = self.cur.fetchall()
+        if len(res) != 0:
+            knowledge_id = res[0][0]
+            self.conn.commit()
+            return federated_pb2.Note(value=f'Knowledge {knowledge_id}')
+        else:
+            return federated_pb2.Note(value='Some error')
+
+    def GetStatus(self, request, context):
+        req_name = request.name
+        req_version = request.version
+        if DEBUG:
+            print(f'[{int(time.time()-STIME)}] GetStatus with {req_name} {req_version}')
+
+        major, minor, micro = map(int, req_version[1:].split('.'))
+
+        self.cur.execute('''SELECT models.id FROM models
+                              INNER JOIN names ON models.name = names.id
+                              WHERE names.name = ?
+                                AND models.major = ?
+                                AND models.minor = ?
+                                AND models.micro = ?;''', (req_name, major, minor, micro))
+        res = self.cur.fetchall()
+        if len(res) != 0:
+            base_id = res[0][0]
+        else:
+            return federated_pb2.Note(value='Not found')
+
+        knowledge = 0
+        self.cur.execute('''SELECT COUNT(*) FROM knowledges
+                              WHERE base = ?;''', (base_id,))
+        res = self.cur.fetchall()
+        if len(res) != 0:
+            knowledge = res[0][0]
+
+        return federated_pb2.StatusReply(name=req_name,
+                                         version=req_version,
+                                         knowledge=knowledge)
+
+    def PushControl(self, request, context):
+        req_name = request.name
+        req_version = request.version
+        req_job = request.job
+        if DEBUG:
+            print(f'[{int(time.time()-STIME)}] GetStatus with {req_name} {req_version} {req_job}')
+
+        major, minor, micro = map(int, req_version[1:].split('.'))
+
+        if req_job == federated_pb2.Control.Job.AGGREGATION:
+            self.cur.execute('''SELECT models.id, models.name, models.label, models.compile, models.architecture FROM models
+                                  INNER JOIN names ON models.name = names.id
+                                  INNER JOIN labels ON models.label = labels.id
+                                  WHERE names.name = ?
+                                    AND models.major = ?
+                                    AND models.minor = ?
+                                    AND models.micro = ?;''', (req_name, major, minor, micro))
+            res = self.cur.fetchall()
+            if len(res) != 0:
+                base_id, name_id, label_id, compile_id, architecture_id = res[0]
+            else:
+                return federated_pb2.Note(value='Not found')
+
+            knowledges = []
+            self.cur.execute('''SELECT parameter FROM knowledges
+                                  WHERE base = ?;''', (base_id,))
+            res = self.cur.fetchall()
+            if len(res) == 0:
+                return federated_pb2.Note(value='Not found knowledges')
+            elif len(res) == 1:
+                return federated_pb2.Note(value='Just one result')
+            else:
+                for row in res:
+                    knowledge = pickle.loads(row[0])
+                    knowledges.append(knowledge)
+
+            merge = knowledges[0]
+            for knowledge in knowledges[1:]:
+                for i in range(len(knowledge)):
+                    merge[i] = merge[i] + knowledge[i]
+
+            for i in range(len(merge)):
+                merge[i] = merge[i] / len(knowledges)
+
+            weights_bytes = io.BytesIO()
+            pickle.dump(merge, weights_bytes)
+            weights_bytes.seek(0)
+
+            new_parameter = weights_bytes.getvalue()
+            new_major = major
+            new_minor = minor
+            new_micro = micro + 1
+            new_version = f'{new_major}.{new_minor}.{new_micro}'
+            
+            self.cur.execute('''INSERT IGNORE INTO parameters (
+                                  name, parameter)
+                                  VALUES (?, ?)
+                                  RETURNING (id);''', (name_id, new_parameter))
+            res = self.cur.fetchall()
+            self.conn.commit()
+            if len(res) == 0:
+                self.cur.execute('''SELECT id FROM parameters
+                                      WHERE name = ?
+                                        AND parameter = ?;''', (name_id, new_parameter))
+                res = self.cur.fetchall()
+            new_parameter_id = res[0][0]
+            if DEBUG:
+                print(f'[{int(time.time()-STIME)}] Inserted parameter to database: {new_parameter_id}')
+
+            self.cur.execute('''INSERT IGNORE INTO models (
+                                  name, label, compile, architecture, parameter,
+                                  major, minor, micro)
+                                  VALUES (
+                                  ?, ?, ?, ?, ?,
+                                  ?, ?, ?)
+                                  RETURNING (id);''', (name_id, label_id, compile_id, architecture_id, new_parameter_id,
+                                                       new_major, new_minor, new_micro))
+            res = self.cur.fetchall()
+            self.conn.commit()
+            new_model_id = res[0][0]
+            if DEBUG:
+                print(f'[{int(time.time()-STIME)}] Inserted model to database: {new_model_id} with {req_name} ({new_version})')
+
+            return federated_pb2.Note(value=f'New model ({new_model_id}) created with {req_name} ({new_version})')
+
 
 
 def main():
