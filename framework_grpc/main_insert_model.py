@@ -33,6 +33,7 @@ def main():
     spec.loader.exec_module(module)
     model = module.FLModel()
 
+    
     name = model.get_name()
     cur.execute('''SELECT id FROM names
                      WHERE name = ?
@@ -40,7 +41,7 @@ def main():
     res = cur.fetchall()
     if len(res) != 0:
         print(f'[{int(time.time()-STIME)}] Already Inserted model to database: {res[0][0]}')
-    #    return
+        return
 
     cur.execute('''INSERT IGNORE INTO names (name)
                      VALUES (?)
@@ -53,6 +54,21 @@ def main():
     name_id = res[0][0]
     if DEBUG:
         print(f'[{int(time.time()-STIME)}] Inserted name to database: {name_id}')
+
+
+    compile_ = model.get_compile()
+    cur.execute('''INSERT IGNORE INTO compiles (
+                     name, compile)
+                     VALUES (?, ?)
+                     RETURNING (id);''', (name_id, compile_))
+    res = cur.fetchall()
+    if len(res) == 0:
+        cur.execute('''SELECT id FROM compiles
+                         WHERE compile = ?;''', (compile_,))
+        res = cur.fetchall()
+    compile_id = res[0][0]
+    if DEBUG:
+        print(f'[{int(time.time()-STIME)}] Inserted compile to database: {compile_id}')
 
     label = model.get_label()
     cur.execute('''INSERT IGNORE INTO labels (
@@ -106,12 +122,12 @@ def main():
             print(f'[{int(time.time()-STIME)}] Skipped inserting parameter to database: {parameter_id}')
 
     cur.execute('''INSERT IGNORE INTO models (
-                     name, label, architecture, parameter,
+                     name, label, compile, architecture, parameter,
                      major, minor, micro)
                      VALUES (
-                     ?, ?, ?, ?,
+                     ?, ?, ?, ?, ?,
                      0, 0, 0)
-                     RETURNING (id);''', (name_id, label_id, architecture_id, parameter_id))
+                     RETURNING (id);''', (name_id, label_id, compile_id, architecture_id, parameter_id))
     res = cur.fetchall()
     if len(res) == 0:
         cur.execute('''SELECT id FROM models
