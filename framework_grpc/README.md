@@ -47,3 +47,11 @@ dbport = 3306
 dbuser = 'fluser'
 dbpassword = 'user-secret-pw'
 ```
+
+# Run example
+
+## KSC2021
+
+```bash
+python3 ./KSC2021/...
+```
