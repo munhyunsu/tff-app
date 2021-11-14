@@ -48,10 +48,18 @@ dbuser = 'fluser'
 dbpassword = 'user-secret-pw'
 ```
 
-# Run example
+# Examples
 
-## KSC2021
+## KSC2021 example
 
 ```bash
-python3 ./KSC2021/...
+cd ./KSC2021
 ```
+
+```bash
+python3 -m grpc_tools.protoc -I./ --python_out . --grpc_python_out . federated.proto
+python3 main_database_init.py --debug --reset
+python3 main_insert_model.py --debug --input model_simple_cnn.py
+python3 main_server.py --debug
+```
+
