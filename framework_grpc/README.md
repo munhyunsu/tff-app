@@ -56,10 +56,18 @@ dbpassword = 'user-secret-pw'
 cd ./KSC2021
 ```
 
+1. Initilize database
+
 ```bash
 python3 -m grpc_tools.protoc -I./ --python_out . --grpc_python_out . federated.proto
 python3 main_database_init.py --debug --reset
 python3 main_insert_model.py --debug --input model_simple_cnn.py
 python3 main_server.py --debug
+```
+
+2. Get base model information
+
+```bash
+python3 main_client_cli_InformationRequest.py --debug
 ```
 
