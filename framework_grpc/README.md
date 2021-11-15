@@ -71,3 +71,9 @@ python3 main_server.py --debug
 python3 main_client_cli_InformationRequest.py --debug
 ```
 
+3. Download model from service
+
+```bash
+python3 main_client_cli_savemodel.py --debug --name SIMPLE-CNN-32-32-3 --version v0.0.0 --output kcc/v0.0.0
+python3 main_client_cli_testmodel_image.py --debug --model kcc/v0.0.0 --data kcc_test
+```
