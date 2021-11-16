@@ -77,3 +77,10 @@ python3 main_client_cli_InformationRequest.py --debug
 python3 main_client_cli_savemodel.py --debug --name SIMPLE-CNN-32-32-3 --version v0.0.0 --output kcc/v0.0.0
 python3 main_client_cli_testmodel_image.py --debug --model kcc/v0.0.0 --data kcc_test
 ```
+
+4. Train model and upload learning result
+
+```bash
+python3 main_client_cli_trainmodel_image.py --debug --model kcc/v0.0.0 --batch_size 32 --steps_per_epoch 200 --data mnist_fashion_train --output kcc/r1/c1
+python3 main_client_cli_uploadmodel.py --debug --name SIMPLE-CNN-32-32-3 --version v0.0.0 --model kcc/r1/c1
+```
