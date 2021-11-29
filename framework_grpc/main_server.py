@@ -96,7 +96,7 @@ class Server(federated_pb2_grpc.Manager):
         compile_ = b''
         if req_compile:
             self.cur.execute('''SELECT compiles.compile FROM compiles
-                                  INNER JOIN models ON compiles.id = models.label
+                                  INNER JOIN models ON compiles.id = models.compile
                                   INNER JOIN names ON models.name = names.id
                                   WHERE names.name = ?
                                     AND models.major = ?
