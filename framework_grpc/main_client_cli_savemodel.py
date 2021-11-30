@@ -34,7 +34,7 @@ def main():
         compile_ = response.compile
         architecture = response.architecture
         parameter = response.parameter
-        print(f'{response.name} {response.version} {len(response.architecture)} {len(response.parameter)}')
+        print(f'{response.name} {response.version} {len(response.architecture)} {len(response.parameter)} {len(response.compile)}')
 
         if len(architecture) != 0 and len(parameter) != 0:
             parameter_bytes = pickle.loads(parameter)
