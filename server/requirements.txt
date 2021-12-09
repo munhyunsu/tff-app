@@ -1,0 +1,6 @@
+pip
+wheel
+grpcio
+numpy
+pandas
+tensorflow
