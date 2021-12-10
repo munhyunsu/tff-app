@@ -49,4 +49,3 @@ class FLModel(model.Model):
         pickle.dump(self.model.get_weights(), weights_bytes)
         weights_bytes.seek(0)
         return weights_bytes.getvalue()
-
