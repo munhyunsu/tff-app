@@ -1,10 +1,4 @@
-# Federated-based traffic classification application
-
-## Federated learning component
-
-### Server
-
-### Client
+# Federated Learning Research Meterials
 
 ## [2021 KSC] gRPC-based Federated Learning Model Service
 
