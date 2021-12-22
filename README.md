@@ -6,14 +6,18 @@
 
 ### Client
 
+## [2021 KSC] gRPC-based Federated Learning Model Service
 
-## [MDPI-Electronics] Part#1 Simulation
+## [2020 MDPI-Electronics] Part#1 Simulation
 
 ### Experiment list
 
 1. Centralized vs. Federated
 1. The number of clients
 1. Data type: Balanced / NonIID
+
+
+
 
 ## TODO
 
