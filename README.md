@@ -6,6 +6,11 @@
 
 - Prototyping for FLHub
 
+### Service components
+
+- FLHub server
+- FLHub CLI client
+
 ## [2020 MDPI-Electronics] Traffic Classification using Federated Learning Simulation
 
 ### Experiment list
