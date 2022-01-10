@@ -21,6 +21,10 @@ STIME = time.time()
 def main():
     model = tf.keras.models.load_model(FLAGS.model)
 
+    if FLAGS.freeze:
+        for i in range(0, len(model.layers)-1):
+            model.layers[i].trainable = False
+
     classes = []
     with open(os.path.join(FLAGS.model, 'labels.pickle'), 'rb') as f:
         classes = pickle.load(f)
@@ -54,6 +58,8 @@ if __name__ == '__main__':
                         help='The steps per epoch')
     parser.add_argument('--data', type=str, required=True,
                         help='The dataset for training')
+    parser.add_argument('--freeze', action='store_true',
+                        help='Freeze feature layer')
     parser.add_argument('--output', type=str, required=True,
                         help='The output path')
 
