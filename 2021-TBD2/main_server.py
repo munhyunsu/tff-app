@@ -21,6 +21,11 @@ STIME = time.time()
 
 class Server(federated_pb2_grpc.Manager):
     def __init__(self):
+        self.get_connector()
+        if DEBUG:
+            print(f'[{int(time.time()-STIME)}] Connected to MariaDB')
+
+    def get_connector(self):
         try:
             self.conn = mariadb.connect(
                         user=secret.dbuser,
@@ -32,10 +37,12 @@ class Server(federated_pb2_grpc.Manager):
             print(f'[{int(time.time()-STIME)}] Error connecting to MariaDB: {e}')
             sys.exit(1)
         self.cur = self.conn.cursor()
-        if DEBUG:
-            print(f'[{int(time.time()-STIME)}] Connected to MariaDB')
+
+    def close_connector(self):
+        self.conn.close()
 
     def GetInformation(self, request, context):
+        self.get_connector()
         req_name = request.name
         if DEBUG:
             print(f'[{int(time.time()-STIME)}] GetInformation with {req_name}')
@@ -65,10 +72,12 @@ class Server(federated_pb2_grpc.Manager):
                                                              version=version)
                 models.append(model)
 
+        self.conn.close()
         return federated_pb2.InformationReply(models=models)
 
 
     def GetModel(self, request, context):
+        self.get_connector()
         req_name = request.name
         req_version = request.version
         req_label = request.label
@@ -132,10 +141,12 @@ class Server(federated_pb2_grpc.Manager):
             if len(res) != 0:
                 parameter = res[0][0]
 
+        self.conn.close()
         return federated_pb2.ModelReply(name=req_name, version=req_version,
                                         label=label, compile=compile_, architecture=architecture, parameter=parameter)
 
     def PushTrainResult(self, request, context):
+        self.get_connector()
         req_name = request.name
         req_version = request.version
         req_parameter = request.parameter
@@ -164,11 +175,14 @@ class Server(federated_pb2_grpc.Manager):
         if len(res) != 0:
             knowledge_id = res[0][0]
             self.conn.commit()
+            self.conn.close()
             return federated_pb2.Note(value=f'Knowledge {knowledge_id}')
         else:
+            self.conn.close()
             return federated_pb2.Note(value='Some error')
 
     def GetStatus(self, request, context):
+        self.get_connector()
         req_name = request.name
         req_version = request.version
         if DEBUG:
@@ -186,6 +200,7 @@ class Server(federated_pb2_grpc.Manager):
         if len(res) != 0:
             base_id = res[0][0]
         else:
+            self.conn.close()
             return federated_pb2.Note(value='Not found')
 
         knowledge = 0
@@ -195,11 +210,13 @@ class Server(federated_pb2_grpc.Manager):
         if len(res) != 0:
             knowledge = res[0][0]
 
+        self.conn.close()
         return federated_pb2.StatusReply(name=req_name,
                                          version=req_version,
                                          knowledge=knowledge)
 
     def PushControl(self, request, context):
+        self.get_connector()
         req_name = request.name
         req_version = request.version
         req_job = request.job
@@ -220,6 +237,7 @@ class Server(federated_pb2_grpc.Manager):
             if len(res) != 0:
                 base_id, name_id, label_id, compile_id, architecture_id = res[0]
             else:
+                self.conn.close()
                 return federated_pb2.Note(value='Not found')
 
             knowledges = []
@@ -227,8 +245,10 @@ class Server(federated_pb2_grpc.Manager):
                                   WHERE base = ?;''', (base_id,))
             res = self.cur.fetchall()
             if len(res) == 0:
+                self.conn.close()
                 return federated_pb2.Note(value='Not found knowledges')
             elif len(res) == 1:
+                self.conn.close()
                 return federated_pb2.Note(value='Just one result')
             else:
                 for row in res:
@@ -282,6 +302,7 @@ class Server(federated_pb2_grpc.Manager):
             if DEBUG:
                 print(f'[{int(time.time()-STIME)}] Inserted model to database: {new_model_id} with {req_name} ({new_version})')
 
+            self.conn.close()
             return federated_pb2.Note(value=f'New model ({new_model_id}) created with {req_name} ({new_version})')
 
 
