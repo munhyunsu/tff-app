@@ -6,6 +6,7 @@ splited_data/
 *.tar.gz
 *.tat.bz2
 *.png
+*.sh
 
 pickles/
 *.pickle
