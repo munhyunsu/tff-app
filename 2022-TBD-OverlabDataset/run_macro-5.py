@@ -35,7 +35,8 @@ while True:
     p = subprocess.run(cmd, shell=True, capture_output=True)
     acc = eval(p.stdout.decode('utf-8').split('\n')[1])[1]
     print(f'{i},{acc}')
-    if i%10 == 9 and acc >= 0.80:
+    # if i%10 == 9 and acc >= 0.80:
+    if i%10 == 9 and acc >= 0.90:
         break
     else:
         i = i + 1
