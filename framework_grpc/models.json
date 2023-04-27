@@ -1,0 +1,13 @@
+{
+  "models": [
+    {
+      "name": "MNIST-CNN",
+      "file": "model_mnist_cnn.py",
+      "options": 
+        {
+          "input_shape": [244, 244, 3],
+          "output": 10
+        }
+    }
+  ]
+}
